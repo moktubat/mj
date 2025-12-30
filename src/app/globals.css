@@ -1,0 +1,84 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: auto;
+  background-color: #d9d9d9;
+  scroll-behavior: smooth;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis {
+  scroll-behavior: auto !important;
+}
+
+.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ff5948;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #e64e3f;
+}
+
+/* -------- Regular -------- */
+@font-face {
+  font-family: "Okta Neue";
+  src: url("/font/OktaNeue/OktaNeue-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* -------- Medium -------- */
+@font-face {
+  font-family: "Okta Neue";
+  src: url("/font/OktaNeue/OktaNeue-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* -------- AlphaLyrae Medium -------- */
+@font-face {
+  font-family: "AlphaLyrae";
+  src: url("/font/alpha_lyrae/AlphaLyrae-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-primary: "Okta Neue", sans-serif;
+  --font-secondary: "AlphaLyrae", sans-serif;
+}
+
+.text-alphaLyrae {
+  font-family: var(--font-secondary);
+}
+
+.text-oktaNeue {
+  font-family: var(--font-primary);
+}
