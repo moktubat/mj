@@ -1,5 +1,6 @@
 "use client";
 
+import { FONT } from "@/styles/font";
 import { useRef, useState } from "react";
 import styled from "styled-components";
 
@@ -88,7 +89,7 @@ const Side = styled.div`
 
 const SideTitle = styled.span`
   color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: ${FONT.alphaLyrae};
   font-size: 16px;
   font-weight: 500;
   text-transform: uppercase;
@@ -116,7 +117,7 @@ const Center = styled.div`
 
 const SectionLabel = styled.p`
   color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: ${FONT.oktaNeue};
   font-size: 20px;
   font-weight: 400;
 `;
@@ -124,7 +125,7 @@ const SectionLabel = styled.p`
 const Title = styled.h2`
   margin-top: 36px;
   color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: ${FONT.alphaLyrae};
   font-size: 64px;
   font-weight: 500;
   line-height: 72px;
@@ -135,7 +136,7 @@ const Title = styled.h2`
 const Description = styled.p`
   margin-top: 20px;
   color: rgba(255, 255, 255, 0.8);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: ${FONT.oktaNeue};
   font-size: 20px;
   transition: opacity 0.4s ease-in-out;
 `;
@@ -167,7 +168,7 @@ const Tags = styled.div`
 const Tag = styled.span`
   background: #fff;
   color: #727e83;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: ${FONT.oktaNeue};
   font-size: 16px;
   padding: 4px 12px;
   border-radius: 99px;

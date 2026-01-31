@@ -72,16 +72,15 @@ const IconWrapper = styled.div`
 
 const MiddleSection = styled.div`
   display: flex;
-  justify-content: space-between;
   gap: 180px;
   flex-wrap: wrap;
+  
 `;
 
 const LeftMiddle = styled.div`
-  max-width: 580px;
-  flex: 1;
   display: flex;
   flex-direction: column;
+  max-width: 616px;
 `;
 
 const GetInTouch = styled.h3`
@@ -90,11 +89,13 @@ const GetInTouch = styled.h3`
   font-size: 90px;
   font-weight: 500;
   line-height: 124px;
-  letter-spacing: -3.6px;
   text-transform: uppercase;
+  transform: scaleX(0.96);
+  transform-origin: left;
 `;
 
 const Divider = styled.hr`
+max-width: 585px;
   border: 0;
   height: 1px;
   background: repeating-linear-gradient(
@@ -138,7 +139,6 @@ const SocialIconWrapper = styled.div`
 `;
 
 const RightMiddle = styled.div`
-  flex: 1;
   margin-top: 24px;
 `;
 
@@ -147,7 +147,8 @@ const RightTitle = styled.h4`
   font-size: 24px;
   font-weight: 500;
   line-height: 32px;
-  letter-spacing: -0.96px;
+  transform: scaleX(0.96);
+  transform-origin: left;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 16px;
@@ -165,7 +166,8 @@ const NavLink = styled.a`
   font-family: ${FONT.alphaLyrae};
   font-size: 28px;
   font-weight: 500;
-  letter-spacing: -0.96px;
+  transform: scaleX(0.96);
+  transform-origin: left;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
@@ -274,8 +276,7 @@ const Footer = () => {
             <GetInTouch>GET IN TOUCH</GetInTouch>
             <Divider />
             <LeftText>
-              A Freelance Front-End Developer based in Dhaka, specializing in building modern,
-              sustainable, and high-performing websites.
+              A Freelance Front-End Developer based in Dhaka, specializing in <br /> building modern, sustainable, and high-performing websites.
             </LeftText>
             <SocialIcons>
               <SocialIconWrapper><FacebookIcon /></SocialIconWrapper>

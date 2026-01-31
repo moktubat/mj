@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import styled from "styled-components";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { FONT } from "@/styles/font";
 import DesignIcon from "@/assets/DesignIcon.svg";
 import DevelopIcon from "@/assets/DevelopIcon.svg";
@@ -9,8 +12,10 @@ import IdeateIcon from "@/assets/IdeateIcon.svg";
 import LaunchIcon from "@/assets/LaunchIcon.svg";
 import ResearchIcon from "@/assets/ResearchIcon.svg";
 
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+// Register GSAP plugins
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 /* STYLES */
 
@@ -41,6 +46,8 @@ const SubTitle = styled.h2`
   font-weight: 500;
   text-transform: uppercase;
   line-height: 56px;
+  transform: scaleX(0.96);
+  transform-origin: left;
 
   @media (min-width: 768px) {
     font-size: 72px;
@@ -80,8 +87,6 @@ const GraphWrap = styled.div`
   }
 `;
 
-// ----------------- Transient props -----------------
-
 const Bubble = styled.div<{
   $w: number;
   $h: number;
@@ -113,8 +118,13 @@ const Bubble = styled.div<{
 
   padding: 10px;
   text-align: center;
-
+  cursor: pointer;
+  transition: filter 0.3s ease;
   will-change: transform;
+
+  &:hover {
+    filter: brightness(1.1);
+  }
 `;
 
 const StepTitle = styled.h3`
@@ -150,91 +160,147 @@ const StepDescWide = styled(StepDesc)`
 /* COMPONENT */
 
 const Process = () => {
-  const bubblesRef = useRef<HTMLDivElement[]>([]);
-
-  const addToRefs = (el: HTMLDivElement | null) => {
-    if (el && !bubblesRef.current.includes(el)) {
-      bubblesRef.current.push(el);
-    }
-  };
+  const sectionRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const labelRef = useRef<HTMLParagraphElement>(null);
+  const graphRef = useRef<HTMLDivElement>(null);
+  const bubblesRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    const bubbles = bubblesRef.current;
-
-    /* ---------------- Entrance ---------------- */
-    gsap.fromTo(
-      bubbles,
-      { opacity: 0, scale: 0.85, y: 50 },
-      {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        duration: 1.2,
+    const ctx = gsap.context(() => {
+      // Animate title and label on scroll
+      gsap.from(titleRef.current, {
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+        x: -100,
+        opacity: 0,
+        duration: 1,
         ease: "power3.out",
-        stagger: 0.12,
-      }
-    );
-
-    /* ---------------- Floating ---------------- */
-    bubbles.forEach((bubble, i) => {
-      gsap.to(bubble, {
-        y: `+=${10 + i * 2}`,
-        duration: 4 + i * 0.4,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
       });
 
-      /* -------- Magnetic Cursor Interaction -------- */
-      const strength = 0.25;
+      gsap.from(labelRef.current, {
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+        x: 100,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
+      });
 
-      const onMouseMove = (e: MouseEvent) => {
-        const rect = bubble.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
+      // Animate bubbles with stagger effect
+      const bubbles = bubblesRef.current.filter(Boolean);
 
-        gsap.to(bubble, {
-          x: x * strength,
-          y: y * strength,
-          duration: 0.4,
-          ease: "power3.out",
-        });
-      };
+      gsap.set(bubbles, {
+        scale: 0,
+        opacity: 0,
+        rotation: -180,
+      });
 
-      const onMouseLeave = () => {
-        gsap.to(bubble, {
-          x: 0,
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: graphRef.current,
+          start: "top 70%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      // Staggered bubble animation with elastic effect
+      timeline.to(bubbles, {
+        scale: 1,
+        opacity: 1,
+        rotation: 0,
+        duration: 1.2,
+        stagger: {
+          amount: 0.8,
+          from: "random",
+        },
+        ease: "elastic.out(1, 0.6)",
+      });
+
+      // Animate descriptions with fade-in
+      const descriptions = bubbles.map((bubble) =>
+        bubble?.querySelector('[class*="StepDesc"]')
+      ).filter(Boolean);
+
+      gsap.set(descriptions, { opacity: 0, y: 20 });
+
+      timeline.to(
+        descriptions,
+        {
+          opacity: 1,
           y: 0,
-          scale: 1,
-          duration: 0.6,
-          ease: "power3.out",
-        });
-      };
-
-      const onMouseEnter = () => {
-        gsap.to(bubble, {
-          scale: 1.08,
-          duration: 0.3,
+          duration: 0.8,
+          stagger: 0.1,
           ease: "power2.out",
-        });
-      };
+        },
+        "-=0.4"
+      );
 
-      bubble.addEventListener("mousemove", onMouseMove);
-      bubble.addEventListener("mouseenter", onMouseEnter);
-      bubble.addEventListener("mouseleave", onMouseLeave);
-    });
+      // Add smooth floating animation to bubbles
+      bubbles.forEach((bubble, index) => {
+        gsap.to(bubble, {
+          y: "+=12",
+          duration: 3 + index * 0.3,
+          repeat: -1,
+          yoyo: true,
+          ease: "power1.inOut",
+          delay: index * 0.2,
+          force3D: true,
+          transformPerspective: 1000,
+        });
+      });
+
+      // Interactive hover effects
+      bubbles.forEach((bubble) => {
+        if (!bubble) return;
+
+        bubble.addEventListener("mouseenter", () => {
+          gsap.to(bubble, {
+            scale: 1.05,
+            duration: 0.4,
+            ease: "power2.out",
+            force3D: true,
+          });
+        });
+
+        bubble.addEventListener("mouseleave", () => {
+          gsap.to(bubble, {
+            scale: 1,
+            duration: 0.4,
+            ease: "power2.out",
+            force3D: true,
+          });
+        });
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, []);
 
   return (
-    <Section>
+    <Section ref={sectionRef}>
       <Container>
         <IntroSection>
-          <SubTitle>My Development Process</SubTitle>
-          <Title>[Working Process]</Title>
+          <SubTitle ref={titleRef}>My Development Process</SubTitle>
+          <Title ref={labelRef}>[Working Process]</Title>
         </IntroSection>
 
-        <GraphWrap>
-          <Bubble ref={addToRefs} $w={620} $h={620} $bg="#0D0D0D" $z={10} $x={-190} $y={-320}>
+        <GraphWrap ref={graphRef}>
+          <Bubble
+            ref={(el) => (bubblesRef.current[0] = el)}
+            $w={620}
+            $h={620}
+            $bg="#0D0D0D"
+            $z={10}
+            $x={-190}
+            $y={-320}
+          >
             <DesignIcon width={24} height={24} />
             <StepTitle>Design</StepTitle>
             <p style={{ color: "white", fontSize: 14, lineHeight: "20px", maxWidth: 230 }}>
@@ -242,7 +308,15 @@ const Process = () => {
             </p>
           </Bubble>
 
-          <Bubble ref={addToRefs} $w={358} $h={358} $bg="#FF5948" $z={20} $x={-500} $y={-120}>
+          <Bubble
+            ref={(el) => (bubblesRef.current[1] = el)}
+            $w={358}
+            $h={358}
+            $bg="#FF5948"
+            $z={20}
+            $x={-500}
+            $y={-120}
+          >
             <ResearchIcon width={24} height={24} />
             <StepTitle>Research</StepTitle>
             <StepDesc $top $left={50}>
@@ -251,7 +325,7 @@ const Process = () => {
           </Bubble>
 
           <Bubble
-            ref={addToRefs}
+            ref={(el) => (bubblesRef.current[2] = el)}
             $w={252}
             $h={252}
             $bg="rgba(255, 255, 255, 0.1)"
@@ -268,7 +342,7 @@ const Process = () => {
           </Bubble>
 
           <Bubble
-            ref={addToRefs}
+            ref={(el) => (bubblesRef.current[3] = el)}
             $w={260}
             $h={260}
             $bg="rgba(23, 23, 23, 0.5)"
@@ -284,7 +358,15 @@ const Process = () => {
             </StepDesc>
           </Bubble>
 
-          <Bubble ref={addToRefs} $w={288} $h={288} $bg="#FF5948" $z={20} $x={222} $y={34}>
+          <Bubble
+            ref={(el) => (bubblesRef.current[4] = el)}
+            $w={288}
+            $h={288}
+            $bg="#FF5948"
+            $z={20}
+            $x={222}
+            $y={34}
+          >
             <DevelopIcon width={24} height={24} />
             <StepTitle>Develop</StepTitle>
             <StepDescWide $left={90} style={{ textAlign: "right" }}>
@@ -293,7 +375,7 @@ const Process = () => {
           </Bubble>
 
           <Bubble
-            ref={addToRefs}
+            ref={(el) => (bubblesRef.current[5] = el)}
             $w={240}
             $h={240}
             $bg="rgba(255,255,255,0.1)"
