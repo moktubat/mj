@@ -1,327 +1,448 @@
 "use client";
 
-import { FONT } from "@/styles/font";
-import { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { countTransition } from "@/utils/anim";
+import { projectDetails } from "@/components/page/Work/projectDetails";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import Overflow from "@/utils/Overflow";
 import styled from "styled-components";
+import Image from "next/image";
+import { FONT } from "@/styles/font";
 
-/* ------------------------------------
-   DATA
------------------------------------- */
+// Only first 4 projects
+const PROJECTS_TO_SHOW = projectDetails.slice(0, 4);
+const TOTAL_PROJECTS = PROJECTS_TO_SHOW.length;
 
-const projects = [
-  {
-    id: 1,
-    title: "PTI DEVELOPMENT",
-    description:
-      "A curated collection of digital products built for SaaS, FinTech, and fast-growing startups, focused on performance, clarity, and scalable design systems.",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop",
-    tags: ["WordPress", "React", "JavaScript"],
-  },
-  {
-    id: 2,
-    title: "EUROCHAMP",
-    description:
-      "An enterprise-grade web platform designed for European clients, delivering reliability, clean architecture, and a seamless experience across devices.",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
-    tags: ["Next.js", "TypeScript"],
-  },
-  {
-    id: 3,
-    title: "JAMROLL LIMITED",
-    description:
-      "A brand-driven digital experience crafted to highlight identity, motion, and storytelling through refined UI, smooth animations, and modern frontend tools.",
-    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop",
-    tags: ["React", "GSAP"],
-  },
-];
-
-/* ------------------------------------
-   STYLES
------------------------------------- */
-
-const ProjectsSection = styled.section<{ bg: string }>`
-  height: 950px;
-  background-image: url(${props => props.bg});
-  background-size: cover;
-  background-position: center;
+const ProjectsWrapper = styled.section`
   position: relative;
-  overflow: hidden;
-  transition: background-image 0.6s ease-in-out;
 `;
 
-const Overlay = styled.div`
+const StickyContainer = styled.div`
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow: hidden;
+`;
+
+const ProjectsInner = styled.div`
   position: absolute;
   inset: 0;
-  background: rgba(2, 4, 17, 0.3);
-  backdrop-filter: blur(12.5px);
-  -webkit-backdrop-filter: blur(12.5px);
-  z-index: 1;
-`;
-
-const Content = styled.div`
-  position: relative;
-  z-index: 2;
-  padding: 165px 0;
-`;
-
-const ScrollTrack = styled.div`
-  height: ${projects.length * 100}vh;
-  position: relative;
+  overflow: hidden;
+  background-color: #0d0e13;
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const ProjectsContainer = styled.div`
-  height: 100vh;
-  max-width: 1320px;
-  margin: 0 auto;
-  position: sticky;
-  top: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const Side = styled.div`
-  width: 250px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
-
-const SideTitle = styled.span`
-  color: #fff;
-  font-family: ${FONT.alphaLyrae};
-  font-size: 16px;
-  font-weight: 500;
-  text-transform: uppercase;
-  transition: opacity 0.4s ease-in-out;
-`;
-
-const Divider = styled.hr`
-  border: none;
-  height: 1px;
-  max-width: 220px;
-  width: 100%;
-  background: repeating-linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0.3) 0,
-    rgba(255, 255, 255, 0.3) 12px,
-    transparent 12px,
-    transparent 20px
-  );
-`;
-
-const Center = styled.div`
-  flex: 1;
-  text-align: center;
-`;
-
-const SectionLabel = styled.p`
-  color: #fff;
-  font-family: ${FONT.oktaNeue};
-  font-size: 20px;
-  font-weight: 400;
-`;
-
-const Title = styled.h2`
-  margin-top: 36px;
-  color: #fff;
-  font-family: ${FONT.alphaLyrae};
-  font-size: 64px;
-  font-weight: 500;
-  line-height: 72px;
-  text-transform: uppercase;
-  transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
-`;
-
-const Description = styled.p`
-  margin-top: 20px;
-  color: rgba(255, 255, 255, 0.8);
-  font-family: ${FONT.oktaNeue};
-  font-size: 20px;
-  transition: opacity 0.4s ease-in-out;
-`;
-
-const ImageWrap = styled.div`
-  margin: 40px auto 0;
-  width: 644px;
-  height: 480px;
-  border-radius: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  position: absolute;
+  inset: 0;
   overflow: hidden;
-  transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
 `;
 
-const ProjectImage = styled.img`
+const ProjectContainer = styled.div<{ $isVisible?: boolean }>`
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: ${(props) => (props.$isVisible ? "block" : "none")};
+`;
+
+const ProjectWrap = styled.div`
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: #0d0e13;
+`;
+
+const ProjectImage = styled(Image)`
+  height: 125vw;
+  opacity: 0.8;
+  transform: scale(1.1);
   width: 100%;
-  height: 100%;
   object-fit: cover;
 `;
 
-const Tags = styled.div`
-  margin-top: 36px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  transition: opacity 0.4s ease-in-out;
+const Thumbnails = styled.div`
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+  height: 27vw;
+  width: 22vw;
 `;
 
-const Tag = styled.span`
-  background: #fff;
-  color: #727e83;
-  font-family: ${FONT.oktaNeue};
-  font-size: 16px;
-  padding: 4px 12px;
-  border-radius: 99px;
+const Thumbnail = styled.div<{ $isVisible?: boolean }>`
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: ${(props) => (props.$isVisible ? "block" : "none")};
 `;
 
-const ArrowButton = styled.button`
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: transform 0.2s ease;
+const ThumbnailImage = styled(Image)`
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  object-fit: cover;
+`;
 
-  &:hover {
-    transform: scale(1.05);
-  }
+const Headings = styled.div`
+  position: absolute;
+  left: 16vw;
+  z-index: 5;
+  color: white;
+`;
 
-  svg {
+const Title = styled.h2`
+  overflow: hidden;
+  font-size: 3.75rem;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+
+  span {
     display: block;
   }
 `;
 
-/* ------------------------------------
-   SVG ICONS
------------------------------------- */
+const Subtitle = styled.p`
+  overflow: hidden;
+  font-family: ${FONT.oktaNeue};
+  font-size: 1.25rem;
+  font-weight: 300;
+  opacity: 0.8;
+  letter-spacing: -0.05em;
 
-const PrevArrow = () => (
-  <svg width="58" height="58" viewBox="0 0 58 58" fill="none">
-    <path
-      d="M1 3.15385C1 1.96431 1.96431 1 3.15385 1H29C44.464 1 57 13.536 57 29C57 44.464 44.464 57 29 57C13.536 57 1 44.464 1 29V3.15385Z"
-      fill="#FFEEED"
-      stroke="#FF5948"
-      strokeWidth="2"
-      strokeDasharray="4 6"
-    />
-    <path
-      d="M34 34L24 24M24 24V34M24 24H34"
-      stroke="#FF5948"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
+  span {
+    display: block;
+  }
+`;
 
-const NextArrow = () => (
-  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-    <path
-      d="M0 28C0 12.536 12.536 0 28 0H53.8462C55.0357 0 56 0.96431 56 2.15385V28C56 43.464 43.464 56 28 56C12.536 56 0 43.464 0 28Z"
-      fill="#FF5948"
-    />
-    <path
-      d="M23 33L33 23M33 23H23M33 23V33"
-      stroke="white"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
+const Indicator = styled.div`
+  position: absolute;
+  right: 4vw;
+  bottom: 4vw;
+  z-index: 9;
+  display: flex;
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: white;
+  gap: 0.5rem;
+  overflow: hidden;
+`;
 
-/* ------------------------------------
-   COMPONENT
------------------------------------- */
+const IndicatorTotal = styled.span`
+  opacity: 0.7;
+`;
 
-export default function Projects() {
-  const [active, setActive] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+const Projects = () => {
+  const [currentNumber, setCurrentNumber] = useState(1);
+  const [direction, setDirection] = useState(1);
+  const tl = useRef<gsap.core.Timeline>();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const handlePrev = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setActive(prev => (prev === 0 ? projects.length - 1 : prev - 1));
-    setTimeout(() => setIsTransitioning(false), 400);
+  useEffect(() => {
+    let ticking = false;
+    let currentProject = 1;
+
+    const handleScroll = () => {
+      if (!ticking && !isAnimating) {
+        window.requestAnimationFrame(() => {
+          if (!wrapperRef.current) return;
+
+          const rect = wrapperRef.current.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+
+          // Check if we're in the Projects section
+          if (rect.top <= 0 && rect.bottom > viewportHeight) {
+            // Calculate which project should be showing
+            const scrolledIntoSection = Math.abs(rect.top);
+            const progress = scrolledIntoSection / (viewportHeight * (TOTAL_PROJECTS - 1));
+
+            const newProject = Math.min(
+              TOTAL_PROJECTS,
+              Math.floor(progress * TOTAL_PROJECTS) + 1
+            );
+
+            if (newProject !== currentProject) {
+              const newDirection = newProject > currentProject ? 1 : -1;
+              setDirection(newDirection);
+              setCurrentNumber(newProject);
+              currentProject = newProject;
+            }
+          }
+
+          ticking = false;
+        });
+
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial check
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isAnimating]);
+
+  Overflow(".headings h2 span", 0, 1.3, [currentNumber, direction]);
+  Overflow(".headings p span", 0.5, 1.3, [currentNumber, direction]);
+
+  useGSAP(
+    () => {
+      const currentprojectContainers = document.querySelector(
+        `[data-currentelement="true"]`
+      );
+      const currentprojectImgContainer =
+        currentprojectContainers?.querySelector(".projectWrap");
+
+      const outprojectContainers = document.querySelector(
+        `[data-outgoingelement="true"]`
+      );
+      const outprojectImgContainer =
+        outprojectContainers?.querySelector(".projectWrap");
+
+      const currentThumbnail = document.querySelector(
+        `[data-currentthumbnail="true"]`
+      );
+
+      const currentThumbnailImgContainer =
+        currentThumbnail?.querySelector(".thumbnailImage");
+
+      const outgoingThumbnail = document.querySelector(
+        `[data-outgoingthumbnail="true"]`
+      );
+
+      const outgoingThumbnailImgContainer =
+        outgoingThumbnail?.querySelector(".thumbnailImage");
+
+      tl.current = gsap.timeline({
+        defaults: {
+          duration: 1.3,
+          ease: "power4.out",
+        },
+        onUpdate: function () {
+          if (this.progress() >= 0.9) {
+            setIsAnimating(false);
+          }
+        },
+      });
+
+      currentThumbnail &&
+        tl.current.set([currentprojectContainers, currentThumbnail], {
+          display: "block",
+          zIndex: 1,
+        });
+
+      outgoingThumbnail &&
+        tl.current.set([outprojectContainers, outgoingThumbnail], {
+          display: "block",
+          zIndex: 2,
+        });
+
+      tl.current.fromTo(
+        outprojectContainers,
+        {
+          clipPath:
+            direction === 1
+              ? "polygon(0 0, 100% 0, 100% 91%, 0 98%)"
+              : "polygon(0 7%, 100% 15%, 100% 100%, 0% 100%)",
+        },
+        {
+          clipPath:
+            direction === 1
+              ? "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)"
+              : "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)",
+
+          onComplete: () => {
+            gsap.set(outprojectContainers, {
+              display: "none",
+              clipPath: "none",
+            });
+          },
+        }
+      );
+
+      tl.current.fromTo(
+        outgoingThumbnail,
+        {
+          clipPath:
+            direction === 1
+              ? "polygon(0 2%, 100% 8%, 100% 100%, 0% 100%)"
+              : "polygon(0 0, 100% 0, 100% 91%, 0 98%)",
+        },
+        {
+          clipPath:
+            direction === 1
+              ? "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)"
+              : "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)",
+
+          onComplete: () => {
+            gsap.set(outprojectContainers, {
+              display: "none",
+              clipPath: "none",
+            });
+          },
+        },
+        0
+      );
+
+      tl.current.from(
+        currentprojectImgContainer as Element,
+        {
+          yPercent: direction === 1 ? 25 : -25,
+        },
+        0
+      );
+
+      tl.current.from(
+        currentThumbnailImgContainer as Element,
+        {
+          yPercent: direction === 1 ? -25 : 25,
+        },
+        0
+      );
+
+      tl.current.to(
+        outprojectImgContainer as Element,
+        {
+          yPercent: direction === 1 ? -50 : 50,
+          scale: 1.5,
+          rotate: direction === 1 ? -7 : 7,
+        },
+        0
+      );
+
+      tl.current.to(
+        outgoingThumbnailImgContainer as Element,
+        {
+          yPercent: direction === 1 ? 50 : -50,
+        },
+        0
+      );
+    },
+    { dependencies: [currentNumber, direction], revertOnUpdate: true }
+  );
+
+  const getOutgoingElement = (id: number) => {
+    if (direction === 1) {
+      if (currentNumber === 1 && id === TOTAL_PROJECTS) {
+        return true;
+      } else if (id === currentNumber - 1) {
+        return true;
+      }
+    } else if (direction === -1) {
+      if (currentNumber === TOTAL_PROJECTS && id === 1) {
+        return true;
+      } else if (id === currentNumber + 1) {
+        return true;
+      }
+    }
+    return false;
   };
-
-  const handleNext = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setActive(prev => (prev === projects.length - 1 ? 0 : prev + 1));
-    setTimeout(() => setIsTransitioning(false), 400);
-  };
-
-  const prev = active === 0 ? projects[projects.length - 1] : projects[active - 1];
-  const next = active === projects.length - 1 ? projects[0] : projects[active + 1];
-  const project = projects[active];
 
   return (
-    <ProjectsSection bg={project.image}>
-      <ScrollTrack>
-        <Overlay />
-        <Content>
-          <ProjectsContainer>
-            {/* LEFT */}
-            <Side>
-              <SideTitle key={`prev-${prev.id}`} style={{ opacity: isTransitioning ? 0 : 1 }}>
-                {prev.title}
-              </SideTitle>
-              <Divider />
-              <ArrowButton onClick={handlePrev} aria-label="Previous project">
-                <PrevArrow />
-              </ArrowButton>
-            </Side>
-
-            {/* CENTER */}
-            <Center>
-              <SectionLabel>[Projects]</SectionLabel>
-              <Title
-                key={`title-${project.id}`}
-                style={{
-                  opacity: isTransitioning ? 0 : 1,
-                  transform: isTransitioning ? 'translateY(10px)' : 'translateY(0)',
-                }}
-              >
-                {project.title}
-              </Title>
-              <Description
-                key={`desc-${project.id}`}
-                style={{ opacity: isTransitioning ? 0 : 1 }}
-              >
-                {project.description}
-              </Description>
-
-              <ImageWrap
-                key={`img-${project.id}`}
-                style={{
-                  opacity: isTransitioning ? 0 : 1,
-                  transform: isTransitioning ? 'scale(0.95)' : 'scale(1)',
-                }}
-              >
-                <ProjectImage src={project.image} alt={project.title} />
-              </ImageWrap>
-
-              <Tags
-                key={`tags-${project.id}`}
-                style={{ opacity: isTransitioning ? 0 : 1 }}
-              >
-                {project.tags.map(tag => (
-                  <Tag key={tag}>{tag}</Tag>
-                ))}
-              </Tags>
-            </Center>
-
-            {/* RIGHT */}
-            <Side style={{ alignItems: "flex-end" }}>
-              <SideTitle key={`next-${next.id}`} style={{ opacity: isTransitioning ? 0 : 1 }}>
-                {next.title}
-              </SideTitle>
-              <Divider />
-              <ArrowButton onClick={handleNext} aria-label="Next project">
-                <NextArrow />
-              </ArrowButton>
-            </Side>
+    <ProjectsWrapper ref={wrapperRef} style={{ height: `${(TOTAL_PROJECTS) * 100}vh` }}>
+      <StickyContainer>
+        <ProjectsInner>
+          <ProjectsContainer className="projects">
+            {PROJECTS_TO_SHOW.map(({ img, id, title }) => {
+              return (
+                <ProjectContainer
+                  key={id}
+                  $isVisible={
+                    id === currentNumber || getOutgoingElement(id) === true
+                  }
+                  data-currentelement={id === currentNumber ? "true" : "false"}
+                  data-outgoingelement={
+                    getOutgoingElement(id) ? "true" : "false"
+                  }
+                >
+                  <ProjectWrap className="projectWrap">
+                    <ProjectImage
+                      src={img}
+                      alt={`Project ${id} showcase image`}
+                      className="project_img"
+                      width={1920}
+                      height={1080}
+                      priority={id === currentNumber}
+                    />
+                  </ProjectWrap>
+                </ProjectContainer>
+              );
+            })}
           </ProjectsContainer>
-        </Content>
-      </ScrollTrack>
-    </ProjectsSection>
+
+          <Thumbnails>
+            {PROJECTS_TO_SHOW.map(({ img, id, title }) => {
+              return (
+                <Thumbnail
+                  key={id}
+                  data-currentthumbnail={
+                    id === currentNumber ? "true" : "false"
+                  }
+                  data-outgoingthumbnail={
+                    getOutgoingElement(id) ? "true" : "false"
+                  }
+                  $isVisible={
+                    id === currentNumber || getOutgoingElement(id) === true
+                  }
+                >
+                  <ThumbnailImage
+                    src={img}
+                    alt={`Project ${id} thumbnail`}
+                    className="thumbnailImage"
+                    width={500}
+                    height={500}
+                    priority={id === currentNumber}
+                  />
+                </Thumbnail>
+              );
+            })}
+          </Thumbnails>
+
+          <Headings className="headings">
+            {PROJECTS_TO_SHOW.map(({ title, id, subtitle }) => {
+              return (
+                id === currentNumber && (
+                  <div key={id}>
+                    {title.split(" ").map((str, index) => (
+                      <Title key={`${str}-${index}`}>
+                        <span>{str}</span>
+                      </Title>
+                    ))}
+                    <Subtitle>
+                      <span>{subtitle}</span>
+                    </Subtitle>
+                  </div>
+                )
+              );
+            })}
+          </Headings>
+
+          <Indicator>
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.span
+                key={currentNumber}
+                variants={countTransition}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                custom={direction}
+              >
+                {currentNumber < 10 ? `0${currentNumber}` : currentNumber}
+              </motion.span>
+            </AnimatePresence>
+            <IndicatorTotal>/ {TOTAL_PROJECTS}</IndicatorTotal>
+          </Indicator>
+        </ProjectsInner>
+      </StickyContainer>
+    </ProjectsWrapper>
   );
-}
+};
+
+export default Projects;

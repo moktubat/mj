@@ -1,21 +1,34 @@
 "use client";
 
-import { FONT } from "@/styles/font";
-import { useState, useLayoutEffect, useRef } from "react";
+import { useState } from "react";
 import styled from "styled-components";
-import gsap from "gsap";
-import ServiceImage from "@/assets/ServiceImage.webp";
 import Image from "next/image";
+import ServiceImage1 from "@/assets/ServiceImage.webp";
+import ServiceImage2 from "@/assets/ServiceImage.webp";
+import ServiceImage3 from "@/assets/ServiceImage.webp";
+import ServiceImage4 from "@/assets/ServiceImage.webp";
 
-/* -----------------------------------
-    STYLES
------------------------------------ */
+import { FONT } from "@/styles/font";
+import { breakpoints } from "@/styles/breakpoints";
 
-const ServicesSection = styled.section`
-  padding: 80px 10px;
+
+/* ================= SECTION ================= */
+
+const Section = styled.section`
+  padding: 100px 10px;
+  background: #e7e7e7;
+  overflow: hidden;
+
+  @media ${breakpoints.md} {
+    padding: 80px 10px;
+  }
+
+  @media ${breakpoints.sm} {
+    padding: 60px 10px;
+  }
 `;
 
-const ServicesContainer = styled.div`
+const Container = styled.div`
   max-width: 1320px;
   margin: 0 auto;
 `;
@@ -24,7 +37,14 @@ const IntroSection = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 80px;
+  margin-bottom: 60px;
+
+  @media ${breakpoints.md} {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
 `;
 
 const SubTitle = styled.h2`
@@ -34,243 +54,499 @@ const SubTitle = styled.h2`
   font-weight: 500;
   line-height: 84px;
   text-transform: uppercase;
-  transform: scaleX(0.96);
-  transform-origin: left;
+
+  @media ${breakpoints.lg} {
+    font-size: 60px;
+    line-height: 70px;
+  }
+
+  @media ${breakpoints.md} {
+    font-size: 48px;
+    line-height: 56px;
+  }
+
+  @media ${breakpoints.sm} {
+    font-size: 36px;
+    line-height: 42px;
+  }
 `;
 
 const Title = styled.p`
   color: #ff5948;
-font-family: ${FONT.oktaNeue};
-font-size: 20px;
-line-height: 28px;
-font-weight: 400;
-`;
+  font-family: ${FONT.oktaNeue};
+  font-size: 20px;
 
-const ServicesGrid = styled.div`
-  display: flex;
-  gap: 20px;
-`;
-
-const ServiceCard = styled.div<{ $active: boolean }>`
-  background: #e7e7e7;
-  padding: 24px;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: flex 0.5s ease, opacity 0.4s ease;
-  overflow: hidden;
-
-  flex: ${({ $active }) => ($active ? 2 : 0.8)};
-  opacity: ${({ $active }) => ($active ? 1 : 0.7)};
-
-  height: 455px;
-  align-self: flex-start;
-`;
-
-/* ----- Header with mode switching ----- */
-const CardHeader = styled.div<{ $active: boolean }>`
-  display: flex;
-  justify-content: ${({ $active }) =>
-    $active ? "space-between" : "flex-start"};
-  align-items: flex-start;
-  flex-direction: ${({ $active }) => ($active ? "row" : "column")};
-  gap: ${({ $active }) => ($active ? "10px" : "12px")};
-`;
-
-const CardNumber = styled.div<{ $active: boolean }>`
-  font-family: "Okta Neue";
-  font-size: 18px;
-  white-space: nowrap;
-  color: ${({ $active }) => ($active ? "#FF5948" : "#6A6A6A")};
-`;
-
-const CardTitle = styled.h3<{ $active: boolean }>`
-  font-family: ${FONT.alphaLyrae};
-  font-weight: 500;
-  font-size: ${({ $active }) => ($active ? "40px" : "20px")};
-  line-height: ${({ $active }) => ($active ? "40px" : "28px")};
-  text-transform: uppercase;
-`;
-
-/* ----- Active Expanded Area ----- */
-
-const ActiveDetails = styled.div`
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-  transition: opacity 0.6s ease, height 0.7s ease;
-
-  &.show {
-    opacity: 1;
-    height: auto;
+  @media ${breakpoints.sm} {
+    font-size: 18px;
   }
 `;
 
-const DetailsRow = styled.div`
+/* ================= SERVICES LIST ================= */
+
+const ServicesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+`;
+
+/* ================= SERVICE CARD ================= */
+
+const ServiceCard = styled.div<{ $isActive: boolean }>`
+  background: ${({ $isActive }) => ($isActive ? "#000" : "#fff")};
+  border: 1px solid ${({ $isActive }) => ($isActive ? "#000" : "#e0e0e0")};
+  border-radius: 12px;
+  padding: ${({ $isActive }) => ($isActive ? "40px" : "32px 40px")};
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${({ $isActive }) =>
+    $isActive ? "0 8px 24px rgba(0, 0, 0, 0.15)" : "0 4px 12px rgba(0, 0, 0, 0.08)"};
+  }
+
+  @media ${breakpoints.md} {
+    padding: ${({ $isActive }) => ($isActive ? "32px" : "24px 32px")};
+  }
+
+  @media ${breakpoints.sm} {
+    padding: ${({ $isActive }) => ($isActive ? "24px" : "20px 24px")};
+  }
+`;
+
+/* ================= CARD HEADER ================= */
+
+const CardHeader = styled.div<{ $isActive: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 40px;
-  margin: 40px 0;
-`;
+  gap: 24px;
 
-const TechList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  span {
-    font-family: ${FONT.alphaLyrae};
-    font-size: 18px;
-    text-transform: uppercase;
-    color: #6a6a6a;
+  @media ${breakpoints.md} {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
 `;
 
-const PreviewImage = styled(Image)`
-  width: 288px;
-  height: 178px;
-  object-fit: cover;
-  border-radius: 12px;
+const LeftSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+
+  @media ${breakpoints.sm} {
+    gap: 16px;
+  }
+`;
+
+const Number = styled.div<{ $isActive: boolean }>`
+  color: ${({ $isActive }) => ($isActive ? "#ff5948" : "#1e1e1e")};
+  font-family: ${FONT.alphaLyrae};
+  font-size: 48px;
+  font-weight: 500;
+  line-height: 1;
+  transition: color 0.4s ease;
+
+  @media ${breakpoints.md} {
+    font-size: 40px;
+  }
+
+  @media ${breakpoints.sm} {
+    font-size: 32px;
+  }
+`;
+
+const ServiceTitle = styled.h3<{ $isActive: boolean }>`
+  color: ${({ $isActive }) => ($isActive ? "#fff" : "#1e1e1e")};
+  font-family: ${FONT.alphaLyrae};
+  font-size: 36px;
+  font-weight: 500;
+  text-transform: uppercase;
+  transition: color 0.4s ease;
+
+  @media ${breakpoints.lg} {
+    font-size: 32px;
+  }
+
+  @media ${breakpoints.md} {
+    font-size: 28px;
+  }
+
+  @media ${breakpoints.sm} {
+    font-size: 24px;
+  }
+`;
+
+const ArrowIcon = styled.div<{ $isActive: boolean }>`
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: ${({ $isActive }) =>
+    $isActive ? "rotate(90deg)" : "rotate(0deg)"};
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Background shape */
+  svg path:nth-child(1) {
+    fill: ${({ $isActive }) => ($isActive ? "#FF5948" : "#FFEEED")};
+    transition: fill 0.4s ease;
+  }
+
+  /* Dashed stroke (hide on active) */
+  svg path:nth-child(2) {
+    opacity: ${({ $isActive }) => ($isActive ? 0 : 1)};
+    transition: opacity 0.4s ease;
+  }
+
+  /*  Arrow */
+  svg path:nth-child(3) {
+    stroke: ${({ $isActive }) => ($isActive ? "#FFFFFF" : "#FF5948")};
+    transition: stroke 0.4s ease;
+  }
+
+  @media ${breakpoints.sm} {
+    width: 48px;
+    height: 48px;
+  }
+`;
+
+/* ================= EXPANDED CONTENT ================= */
+
+const ExpandedContent = styled.div<{
+  $isActive: boolean;
+  $expandFrom: "top" | "bottom";
+}>`
+  display: grid;
+  grid-template-rows: ${({ $isActive }) => ($isActive ? "1fr" : "0fr")};
+  transition: grid-template-rows 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: ${({ $isActive }) => ($isActive ? 1 : 0)};
+  transition: grid-template-rows 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.5s ease 0.1s;
+
+  margin-top: ${({ $isActive, $expandFrom }) =>
+    $isActive && $expandFrom === "top" ? "24px" : "0"};
+
+  margin-bottom: ${({ $isActive, $expandFrom }) =>
+    $isActive && $expandFrom === "bottom" ? "24px" : "0"};
+`;
+
+const ExpandedInner = styled.div`
+  overflow: hidden;
+`;
+
+const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+
+  @media ${breakpoints.lg} {
+    gap: 32px;
+  }
+
+  @media ${breakpoints.md} {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+`;
+
+const LeftContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const TagsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 2px;
+
+  @media ${breakpoints.sm} {
+    gap: 8px;
+  }
+`;
+
+
+const FirstRow = styled.div`
+  display: flex;
+  gap: 12px;
+
+  @media ${breakpoints.sm} {
+    gap: 8px;
+  }
+`;
+
+const SecondRow = styled.div`
+  display: flex;
+  gap: 12px;
+
+  @media ${breakpoints.sm} {
+    gap: 8px;
+  }
+`;
+
+const Tag = styled.span`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-family: ${FONT.oktaNeue};
+  font-size: 14px;
+  text-align: center;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+
+  @media ${breakpoints.sm} {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
 `;
 
 const Description = styled.p`
+  color: #afafaf;
   font-family: ${FONT.oktaNeue};
   font-size: 16px;
   line-height: 24px;
+  transition: color 0.3s ease;
+
+  @media ${breakpoints.sm} {
+    font-size: 14px;
+    line-height: 22px;
+  }
 `;
 
-/* -----------------------------------
-    DATA
------------------------------------ */
+const RightContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  @media ${breakpoints.md} {
+    margin-top: 20px;
+  }
+`;
 
-const serviceData = [
+const ImageWrapper = styled.div`
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 16 / 10;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.4s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+
+  img {
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
+  }
+
+  @media ${breakpoints.sm} {
+    max-width: 100%;
+  }
+`;
+
+/* ================= SERVICES DATA ================= */
+
+type Service = {
+  id: number;
+  title: string;
+  tags: string[];
+  description: string;
+  image: string;
+};
+
+const services: Service[] = [
   {
-    id: "00-1",
-    title: "Front-End <br/> Development",
-    tech: ["/React", "/Next", "/GSAP"],
-    image: ServiceImage,
+    id: 1,
+    title: "Front-End Development",
+    tags: [
+      "React",
+      "Next.js",
+      "GSAP",
+      "Responsive UI",
+      "Performance Optimization",
+    ],
     description:
-      "Expert Front-End Development with React and Next.js, creating fast, responsive, and interactive web applications for modern businesses.",
+      "I'm a passionate Front-End Developer with experience building fast, responsive, and scalable user interfaces using React, Next.js, and modern web technologies.",
+    image: ServiceImage1.src,
   },
   {
-    id: "00-2",
-    title: "UI/UX <br/> Integration",
-    tech: ["/Figma", "/Framer", "/Tailwind"],
-    image: ServiceImage,
+    id: 2,
+    title: "UI/UX Integration",
+    tags: [
+      "Figma to Code",
+      "Framer",
+      "Tailwind CSS",
+      "Pixel-Perfect UI",
+      "Design Systems",
+    ],
     description:
-      "Professional UI/UX Integration using Figma and Framer, crafting visually appealing and user-friendly designs to enhance web experiences.",
+      "I specialize in turning UI/UX designs into clean, functional, and pixel-perfect interfaces, ensuring smooth interaction and consistent user experience across all devices.",
+    image: ServiceImage2.src,
   },
   {
-    id: "00-3",
-    title: "Full-Stack <br/> Solutions",
-    tech: ["/Node", "/Express", "/MongoDB"],
-    image: ServiceImage,
+    id: 3,
+    title: "Full-Stack Solutions",
+    tags: [
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "REST APIs",
+      "Authentication",
+    ],
     description:
-      "Reliable Full-Stack Solutions with Node, Express, and MongoDB to build scalable, secure, and high-performance web applications efficiently.",
+      "I'm a passionate Front-End Developer with experience building dynamic, responsive, and modern web applications using React and Node.js.",
+    image: ServiceImage3.src,
   },
   {
-    id: "00-4",
-    title: "WordPress <br/> Customization",
-    tech: ["/Elementor", "/WooCommerce", "/Custom"],
-    image: ServiceImage,
+    id: 4,
+    title: "WordPress Customization",
+    tags: [
+      "Elementor",
+      "WooCommerce",
+      "Custom Themes",
+      "Performance Optimization",
+      "SEO Ready",
+    ],
     description:
-      "Customized WordPress Development with Elementor and WooCommerce, delivering responsive, SEO-optimized, and tailored websites for clients.",
+      "I build and customize WordPress websites with a focus on performance, flexibility, and clean design, using modern tools and custom solutions tailored to your needs.",
+    image: ServiceImage4.src,
   },
 ];
 
-/* -----------------------------------
-    COMPONENT
------------------------------------ */
 
-const Services = () => {
-  const [activeIndex, setActiveIndex] = useState(2); // auto-open 3rd
-  const cardsRef = useRef([]);
+/* ================= MAIN COMPONENT ================= */
 
-  useLayoutEffect(() => {
-    if (!cardsRef.current[activeIndex]) return;
-    const card = cardsRef.current[activeIndex];
+export default function Services() {
+  const [activeId, setActiveId] = useState<number>(2);
+  const [expandFrom, setExpandFrom] = useState<"top" | "bottom">("top");
 
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-    tl.fromTo(
-      card.querySelector(".details"),
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.8 }
-    );
-
-    tl.fromTo(
-      card.querySelectorAll(".tech-item"),
-      { opacity: 0, x: -20 },
-      { opacity: 1, x: 0, stagger: 0.12, duration: 0.6 },
-      "-=0.5"
-    );
-
-    tl.fromTo(
-      card.querySelector(".image"),
-      { opacity: 0, scale: 0.85 },
-      { opacity: 1, scale: 1, duration: 0.7 },
-      "-=0.4"
-    );
-  }, [activeIndex]);
 
   return (
-    <ServicesSection>
-      <ServicesContainer>
+    <Section>
+      <Container>
         <IntroSection>
           <SubTitle>What I Can Offer</SubTitle>
           <Title>[Services]</Title>
         </IntroSection>
 
-        <ServicesGrid>
-          {serviceData.map((item, i) => {
-            const isActive = activeIndex === i;
+        <ServicesList>
+          {services.map((service) => {
+            const isActive = activeId === service.id;
 
             return (
               <ServiceCard
-                key={i}
-                $active={isActive}
-                ref={(el) => (cardsRef.current[i] = el)}
-                onMouseEnter={() => setActiveIndex(i)}
-              >
-                {/* Header */}
-                <CardHeader $active={isActive}>
-                  <CardNumber $active={isActive}>{item.id}</CardNumber>
+                key={service.id}
+                $isActive={isActive}
+                onMouseEnter={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const viewportMiddle = window.innerHeight / 2;
 
-                  <CardTitle
-                    $active={isActive}
-                    dangerouslySetInnerHTML={{ __html: item.title }}
-                  />
+                  setExpandFrom(rect.top < viewportMiddle ? "top" : "bottom");
+                  setActiveId(service.id);
+                }}
+                onClick={() => {
+                  setActiveId((prev) => (prev === service.id ? -1 : service.id));
+                }}
+              >
+                <CardHeader $isActive={isActive}>
+                  <LeftSection>
+                    <Number $isActive={isActive}>
+                      {service.id.toString().padStart(2, "0")}.
+                    </Number>
+                    <ServiceTitle $isActive={isActive}>{service.title}</ServiceTitle>
+                  </LeftSection>
+
+                  <ArrowIcon $isActive={isActive}>
+                    <svg
+                      viewBox="0 0 58 58"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M1 3.15385C1 1.96431 1.96431 1 3.15385 1L29 1C44.464 1 57 13.536 57 29C57 44.464 44.464 57 29 57C13.536 57 1 44.464 1 29L1 3.15385Z" />
+                      <path
+                        d="M1 3.15385C1 1.96431 1.96431 1 3.15385 1L29 1C44.464 1 57 13.536 57 29C57 44.464 44.464 57 29 57C13.536 57 1 44.464 1 29L1 3.15385Z"
+                        stroke="#FF5948"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeDasharray="4 6"
+                      />
+                      <path
+                        d="M34 34L24 24M24 24V34M24 24H34"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </ArrowIcon>
                 </CardHeader>
 
-                {/* Always mounted – smooth transition */}
-                <ActiveDetails
-                  className={`details ${isActive ? "show" : "hide"}`}
+                <ExpandedContent
+                  $isActive={isActive}
+                  $expandFrom={expandFrom}
                 >
-                  <DetailsRow>
-                    <TechList>
-                      {item.tech.map((t, idx) => (
-                        <span key={idx} className="tech-item">
-                          {t}
-                        </span>
-                      ))}
-                    </TechList>
+                  <ExpandedInner>
+                    <ContentGrid>
+                      <LeftContent>
+                        <TagsContainer>
+                          <FirstRow>
+                            {service.tags.slice(0, 2).map((tag, index) => (
+                              <Tag key={index}>{tag}</Tag>
+                            ))}
+                          </FirstRow>
+                          <SecondRow>
+                            {service.tags.slice(2).map((tag, index) => (
+                              <Tag key={index + 2}>{tag}</Tag>
+                            ))}
+                          </SecondRow>
+                        </TagsContainer>
+                        <Description>{service.description}</Description>
+                      </LeftContent>
 
-                    <PreviewImage
-                      src={item.image}
-                      alt="Service Preview"
-                      className="image"
-                    />
-                  </DetailsRow>
-
-                  <Description>{item.description}</Description>
-                </ActiveDetails>
+                      <RightContent>
+                        <ImageWrapper>
+                          <Image
+                            src={service.image}
+                            alt={service.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
+                          />
+                        </ImageWrapper>
+                      </RightContent>
+                    </ContentGrid>
+                  </ExpandedInner>
+                </ExpandedContent>
               </ServiceCard>
             );
           })}
-        </ServicesGrid>
-      </ServicesContainer>
-    </ServicesSection>
+        </ServicesList>
+      </Container>
+    </Section>
   );
-};
-
-export default Services;
+}
