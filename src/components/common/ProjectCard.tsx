@@ -3,6 +3,7 @@
 import { useRef, useLayoutEffect } from "react";
 import styled from "styled-components";
 import Image from "next/image";
+import Link from "next/link";
 import { gsap } from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { FONT } from "@/styles/font";
@@ -19,15 +20,27 @@ const CardContainer = styled.div`
   border-radius: 1rem;
   overflow: hidden;
   cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-4px);
+  }
 
   @media (max-width: ${breakpoints.sm}) {
     border-radius: 0.75rem;
   }
 `;
 
+const CardLink = styled(Link)`
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  text-decoration: none;
+`;
+
 const CardImage = styled.div`
-  width: 644px;
-  height: 644px;
+  width: 100%;
+  height: 100%;
   position: relative;
 
   img {
@@ -65,20 +78,71 @@ const SVGStroke = styled.div<{ $color: string }>`
   }
 `;
 
-const CardTitle = styled.div`
+const ContentWrapper = styled.div`
   position: absolute;
-  bottom: 2rem;
-  left: 2rem;
-  color: #000;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem;
+  pointer-events: none;
+
+  @media (max-width: ${breakpoints.md}) {
+    padding: 1.5rem;
+  }
+
+  @media (max-width: ${breakpoints.sm}) {
+    padding: 1.25rem;
+  }
+`;
+
+const Tags = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(10px);
+
+  @media (max-width: ${breakpoints.sm}) {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+`;
+
+const Tag = styled.span`
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-style: dashed;
+  color: #fff;
+  font-family: ${FONT.oktaNeue};
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 100px;
+  white-space: nowrap;
+
+  @media (max-width: ${breakpoints.sm}) {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+`;
+
+const CardTitle = styled.div`
   overflow: hidden;
+  margin-bottom: 8px;
 
   h3 {
     font-family: ${FONT.alphaLyrae};
-    font-size: clamp(2rem, 2.5vw, 3rem);
-    font-weight: 450;
-    line-height: 1.25;
-    letter-spacing: -0.025rem;
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 40px;
+    text-transform: uppercase;
+    transform: scaleX(0.96);
+    transform-origin: left;
     margin: 0;
+    color: #1E1E1E;
+    opacity: 0;
+    transform: translateY(10px);
   }
 
   .word {
@@ -88,13 +152,35 @@ const CardTitle = styled.div`
   }
 
   @media (max-width: ${breakpoints.md}) {
-    bottom: 1.5rem;
-    left: 1.5rem;
+    h3 {
+      font-size: 28px;
+      line-height: 32px;
+    }
   }
 
   @media (max-width: ${breakpoints.sm}) {
-    bottom: 1.25rem;
-    left: 1.25rem;
+    h3 {
+      font-size: 24px;
+      line-height: 28px;
+    }
+  }
+`;
+
+const Description = styled.p`
+  font-family: ${FONT.oktaNeue};
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6A6A6A;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(10px);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  @media (max-width: ${breakpoints.sm}) {
+    font-size: 13px;
   }
 `;
 
@@ -139,6 +225,8 @@ interface ProjectCardProps {
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     const cardRef = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLHeadingElement>(null);
+    const tagsRef = useRef<HTMLDivElement>(null);
+    const descRef = useRef<HTMLParagraphElement>(null);
     const splitRef = useRef<SplitText | null>(null);
     const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
@@ -168,6 +256,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             if (timelineRef.current) timelineRef.current.kill();
             timelineRef.current = gsap.timeline();
 
+            // Animate SVG strokes
             cardPaths.forEach((path) => {
                 timelineRef.current!.to(
                     path,
@@ -181,6 +270,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                 );
             });
 
+            // Animate tags
+            timelineRef.current.to(
+                tagsRef.current,
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    ease: "power3.out",
+                },
+                0.2
+            );
+
+            // Animate title words
             if (splitRef.current) {
                 timelineRef.current.to(
                     splitRef.current.words,
@@ -193,6 +295,30 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                     0.35
                 );
             }
+
+            // Animate title container
+            timelineRef.current.to(
+                titleRef.current,
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    ease: "power3.out",
+                },
+                0.3
+            );
+
+            // Animate description
+            timelineRef.current.to(
+                descRef.current,
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    ease: "power3.out",
+                },
+                0.45
+            );
         };
 
         // Mouse leave handler
@@ -200,6 +326,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             if (timelineRef.current) timelineRef.current.kill();
             timelineRef.current = gsap.timeline();
 
+            // Reverse SVG strokes
             cardPaths.forEach((path) => {
                 const svgPath = path as SVGPathElement;
                 const length = svgPath.getTotalLength();
@@ -215,6 +342,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                 );
             });
 
+            // Reverse content animations
+            timelineRef.current.to(
+                [tagsRef.current, titleRef.current, descRef.current],
+                {
+                    opacity: 0,
+                    y: 10,
+                    duration: 0.4,
+                    ease: "power3.out",
+                },
+                0
+            );
+
+            // Reverse title words
             if (splitRef.current) {
                 timelineRef.current.to(
                     splitRef.current.words,
@@ -243,6 +383,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
 
     return (
         <CardContainer ref={cardRef} id={project.id}>
+            {project.link && (
+                <CardLink href={project.link} aria-label={`View ${project.title}`} />
+            )}
+
             <CardImage>
                 <Image
                     src={project.image}
@@ -261,9 +405,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                 <SVGPath2 />
             </SVGStroke>
 
-            <CardTitle>
-                <h3 ref={titleRef}>{project.title}</h3>
-            </CardTitle>
+            <ContentWrapper>
+                <Tags ref={tagsRef}>
+                    {project.tags.map((tag, index) => (
+                        <Tag key={index}>{tag}</Tag>
+                    ))}
+                </Tags>
+
+                <CardTitle>
+                    <h3 ref={titleRef}>{project.title}</h3>
+                </CardTitle>
+
+                <Description ref={descRef}>{project.description}</Description>
+            </ContentWrapper>
         </CardContainer>
     );
 };

@@ -5,11 +5,11 @@ import styled from "styled-components";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
+import { FONT } from "@/styles/font";
 import { breakpoints } from "@/styles/breakpoints";
 import ProjectCard from "@/components/common/ProjectCard";
-import { projectsData } from "@/components/common/projects.data";
+import projectsData from "@/components/common/projects.data";
 import { Project } from "@/types/project";
-import { FONT } from "@/styles/font";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -20,11 +20,11 @@ const Section = styled.section`
   background: #1e1e1e;
   overflow: hidden;
 
-  @media ${breakpoints.md} {
+  @media (max-width: ${breakpoints.md}) {
     padding: 80px 10px;
   }
 
-  @media ${breakpoints.sm} {
+  @media (max-width: ${breakpoints.sm}) {
     padding: 60px 10px;
   }
 `;
@@ -39,6 +39,12 @@ const IntroSection = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 40px;
+
+  @media (max-width: ${breakpoints.md}) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
 `;
 
 const SubTitle = styled.h2`
@@ -55,12 +61,21 @@ const SubTitle = styled.h2`
     font-size: 72px;
     line-height: 84px;
   }
+
+  @media (max-width: ${breakpoints.sm}) {
+    font-size: 36px;
+    line-height: 42px;
+  }
 `;
 
 const Title = styled.p`
   color: #ff5948;
   font-size: 20px;
   font-family: ${FONT.oktaNeue};
+
+  @media (max-width: ${breakpoints.sm}) {
+    font-size: 18px;
+  }
 `;
 
 const Grid = styled.div`
@@ -70,21 +85,19 @@ const Grid = styled.div`
 
   @media (max-width: 1000px) {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   @media (max-width: ${breakpoints.sm}) {
-    gap: 0.75rem;
-    padding: 0 0.75rem;
+    gap: 16px;
   }
 `;
-
 
 /* ================= COMPONENT ================= */
 const Projects: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const labelRef = useRef<HTMLParagraphElement>(null);
-
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -120,7 +133,9 @@ const Projects: React.FC = () => {
     return () => ctx.revert();
   }, []);
 
+
   const projectsToShow: Project[] = projectsData.slice(0, 4);
+
 
   return (
     <Section ref={sectionRef}>
@@ -131,7 +146,7 @@ const Projects: React.FC = () => {
         </IntroSection>
 
         <Grid>
-          {projectsToShow.map(project => (
+          {projectsToShow.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </Grid>
