@@ -16,6 +16,7 @@ if (typeof window !== "undefined") {
 /* ================= SECTION ================= */
 
 const CareerSection = styled.section`
+  background: #D9D9D9;
   padding: 100px 10px;
   overflow: hidden;
 `;

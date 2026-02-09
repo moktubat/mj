@@ -21,7 +21,7 @@ if (typeof window !== "undefined") {
 
 const Section = styled.section`
   padding: 80px 10px;
-  background: black;
+  background: #1e1e1e;
   overflow: hidden;
   font-family: ${FONT.oktaNeue};
 `;

@@ -28,7 +28,7 @@ max-width: 1320px;
 
 
 const TopSection = styled.div`
-  background-color: #e7e7e7;
+  background-color: #D9D9D9;
   padding: 20px;
   border-radius: 12px;
   display: flex;

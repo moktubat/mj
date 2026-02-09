@@ -18,6 +18,7 @@ import { useRef, useState, useEffect } from "react";
    STYLES
 ------------------------------------------------ */
 const Section = styled.section`
+background: #D9D9D9;
   padding: 80px 10px;
 `;
 

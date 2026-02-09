@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 
 const AboutSection = styled.section`
-  background: #e7e7e7;
+  background: #D9D9D9;
   padding: 80px 10px;
 `;
 

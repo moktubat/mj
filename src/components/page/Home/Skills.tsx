@@ -24,7 +24,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ---------------- STYLED COMPONENTS ---------------- */
 const Section = styled.section`
-  background: #e7e7e7;
+  background: #D9D9D9;
   padding: 100px 10px 70px 10px;
 `;
 
