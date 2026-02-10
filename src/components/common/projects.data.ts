@@ -9,6 +9,7 @@ const projectsData: Project[] = [
     image: "/image1.jpg",
     stroke1Color: "#e67339",
     stroke2Color: "#AFAFAF",
+    category: "E-Commerce",
     link: "#",
   },
   {
@@ -19,6 +20,7 @@ const projectsData: Project[] = [
     image: "/image2.jpg",
     stroke1Color: "#a66363",
     stroke2Color: "#AFAFAF",
+    category: "Portfolio",
     link: "#",
   },
   {
@@ -29,6 +31,7 @@ const projectsData: Project[] = [
     image: "/image3.jpg",
     stroke1Color: "#eb3828",
     stroke2Color: "#AFAFAF",
+    category: "Analytics",
     link: "#",
   },
   {
@@ -39,6 +42,7 @@ const projectsData: Project[] = [
     image: "/image4.jpg",
     stroke1Color: "#5f7c98",
     stroke2Color: "#AFAFAF",
+    category: "Real Estate",
     link: "#",
   },
 ];

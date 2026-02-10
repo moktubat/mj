@@ -6,5 +6,6 @@ export type Project = {
   image: string;
   stroke1Color: string;
   stroke2Color: string;
+  category: string;
   link?: string;
 };

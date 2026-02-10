@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import styled from "styled-components";
 import { breakpoints } from "@/styles/breakpoints";
 
@@ -11,6 +11,7 @@ import LinkedInIcon from "@/assets/linkedin.svg";
 import GithubIcon from "@/assets/github.svg";
 import MahadyIcon from "@/assets/mahady.svg";
 import { FONT } from "@/styles/font";
+import gsap from "gsap";
 
 const FooterSection = styled.footer`
   background-color: #1e1e1e;
@@ -19,16 +20,15 @@ const FooterSection = styled.footer`
 `;
 
 const FooterContainer = styled.div`
-max-width: 1320px;
+  max-width: 1320px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 48px;
 `;
 
-
 const TopSection = styled.div`
-  background-color: #D9D9D9;
+  background-color: #d9d9d9;
   padding: 20px;
   border-radius: 12px;
   display: flex;
@@ -58,7 +58,7 @@ const ContactIcons = styled.div`
 const IconWrapper = styled.div`
   width: 32px;
   height: 32px;
-  background: #FF5948;
+  background: #ff5948;
   border-radius: 100px;
   display: flex;
   justify-content: center;
@@ -74,7 +74,6 @@ const MiddleSection = styled.div`
   display: flex;
   gap: 180px;
   flex-wrap: wrap;
-  
 `;
 
 const LeftMiddle = styled.div`
@@ -95,7 +94,7 @@ const GetInTouch = styled.h3`
 `;
 
 const Divider = styled.hr`
-max-width: 585px;
+  max-width: 585px;
   border: 0;
   height: 1px;
   background: repeating-linear-gradient(
@@ -120,13 +119,13 @@ const LeftText = styled.p`
 const SocialIcons = styled.div`
   display: flex;
   gap: 12px;
-  margin-top: auto; 
+  margin-top: auto;
 `;
 
 const SocialIconWrapper = styled.div`
   width: 40px;
   height: 40px;
-  background: #FF5948; /* or any other color */
+  background: #ff5948;
   border-radius: 100px;
   display: flex;
   justify-content: center;
@@ -166,41 +165,43 @@ const NavLink = styled.a`
   font-family: ${FONT.alphaLyrae};
   font-size: 28px;
   font-weight: 500;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-flex;
+  position: relative;
+  overflow: hidden;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.9);
+  width: fit-content;
+
+  /* CRITICAL: Apply scaleX to make letters pixelated */
   transform: scaleX(0.96);
   transform-origin: left;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  line-height: 1.2;
-  display: inline-flex;
-  overflow: hidden;
-  width: fit-content;
-  padding: 0.1em 0;
+
+  .layer {
+    display: block;
+    /* Inherit the parent's transform */
+  }
+
+  .layer.top {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .layer.bottom {
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #ff5948;
+    clip-path: inset(100% 0 0 0);
+    will-change: clip-path;
+  }
 
   &:visited {
     color: rgba(255, 255, 255, 0.9);
   }
-
-  &::selection {
-    background: transparent;
-  }
-
-  span {
-    display: inline-block;
-    text-shadow: 0 1.2em #FF5948;
-    transition: translate 800ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--trans-delay);
-  }
-
-  ${[...Array(20)].map((_, i) => `
-    span:nth-child(${i + 1}) {
-      --trans-delay: ${i * 30}ms;
-    }
-  `).join('')}
-
-  &:hover span {
-    translate: 0 -1.2em;
-  }
 `;
+
+
 
 const FooterDivider = styled.hr`
   border: 0;
@@ -249,13 +250,47 @@ const BottomRightText = styled.span`
   }
 `;
 
+interface AnimatedNavLinkProps {
+  href: string;
+  children: string;
+}
+
+const AnimatedNavLink = ({ href, children }: AnimatedNavLinkProps) => {
+  const linkRef = useRef<HTMLAnchorElement>(null);
+
+  const enter = () => {
+    const bottom = linkRef.current?.querySelector(".bottom");
+    if (!bottom) return;
+
+    gsap.to(bottom, {
+      clipPath: "inset(0% 0 0 0)",
+      duration: 0.5,
+      ease: "power2.out",
+    });
+  };
+
+  const leave = () => {
+    const bottom = linkRef.current?.querySelector(".bottom");
+    if (!bottom) return;
+
+    gsap.to(bottom, {
+      clipPath: "inset(100% 0 0 0)",
+      duration: 0.5,
+      ease: "power2.out",
+    });
+  };
+
+  return (
+    <NavLink href={href} ref={linkRef} onMouseEnter={enter} onMouseLeave={leave}>
+      <span className="layer top">{children}</span>
+      <span className="layer bottom">{children}</span>
+    </NavLink>
+  );
+};
+
 
 const Footer = () => {
-  const [currentYear, setCurrentYear] = useState(2024);
-
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
+  const [currentYear] = useState(new Date().getFullYear());
 
   return (
     <FooterSection>
@@ -264,9 +299,15 @@ const Footer = () => {
         <TopSection>
           <ContactText>Contact Me</ContactText>
           <ContactIcons>
-            <IconWrapper><PhoneIcon /></IconWrapper>
-            <IconWrapper><MailIcon /></IconWrapper>
-            <IconWrapper><LocationIcon /></IconWrapper>
+            <IconWrapper>
+              <PhoneIcon />
+            </IconWrapper>
+            <IconWrapper>
+              <MailIcon />
+            </IconWrapper>
+            <IconWrapper>
+              <LocationIcon />
+            </IconWrapper>
           </ContactIcons>
         </TopSection>
 
@@ -276,12 +317,19 @@ const Footer = () => {
             <GetInTouch>GET IN TOUCH</GetInTouch>
             <Divider />
             <LeftText>
-              A Freelance Front-End Developer based in Dhaka, specializing in <br /> building modern, sustainable, and high-performing websites.
+              A Freelance Front-End Developer based in Dhaka, specializing in <br />
+              building modern, sustainable, and high-performing websites.
             </LeftText>
             <SocialIcons>
-              <SocialIconWrapper><FacebookIcon /></SocialIconWrapper>
-              <SocialIconWrapper><LinkedInIcon /></SocialIconWrapper>
-              <SocialIconWrapper><GithubIcon /></SocialIconWrapper>
+              <SocialIconWrapper>
+                <FacebookIcon />
+              </SocialIconWrapper>
+              <SocialIconWrapper>
+                <LinkedInIcon />
+              </SocialIconWrapper>
+              <SocialIconWrapper>
+                <GithubIcon />
+              </SocialIconWrapper>
             </SocialIcons>
           </LeftMiddle>
 
@@ -289,37 +337,19 @@ const Footer = () => {
             <RightTitle>BASED IN: DHAKA BANGLADESH</RightTitle>
             <RightTitle>Mobile No: +880 17849 35773</RightTitle>
             <RightTitle>Email: MoktubatJaman@gmail.com</RightTitle>
+
             <NavLinks>
-              <NavLink href="#home">
-                {'Home'.split('').map((letter, i) => (
-                  <span key={i}>{letter}</span>
-                ))}
-              </NavLink>
-              <NavLink href="#about">
-                {'About Me'.split('').map((letter, i) => (
-                  <span key={i}>{letter === ' ' ? '\u00A0' : letter}</span>
-                ))}
-              </NavLink>
-              <NavLink href="#projects">
-                {'Projects'.split('').map((letter, i) => (
-                  <span key={i}>{letter}</span>
-                ))}
-              </NavLink>
-              <NavLink href="#process">
-                {'Working Process'.split('').map((letter, i) => (
-                  <span key={i}>{letter === ' ' ? '\u00A0' : letter}</span>
-                ))}
-              </NavLink>
-              <NavLink href="#reviews">
-                {'Reviews'.split('').map((letter, i) => (
-                  <span key={i}>{letter}</span>
-                ))}
-              </NavLink>
+              <AnimatedNavLink href="#home">Home</AnimatedNavLink>
+              <AnimatedNavLink href="#about">About Me</AnimatedNavLink>
+              <AnimatedNavLink href="#projects">Projects</AnimatedNavLink>
+              <AnimatedNavLink href="#process">Working Process</AnimatedNavLink>
+              <AnimatedNavLink href="#reviews">Reviews</AnimatedNavLink>
             </NavLinks>
           </RightMiddle>
         </MiddleSection>
 
         <FooterDivider />
+
         <BottomSection>
           <BottomLeft>© {currentYear} Moktubat Jaman, All Rights Reserved</BottomLeft>
 

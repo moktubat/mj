@@ -73,12 +73,16 @@ const Slide = styled.div`
 `;
 
 const Quote = styled.p`
-  max-width: 700px;
+  max-width: 40ch;
   font-family: ${FONT.oktaNeue};
   font-size: 30px;
-  line-height: 36px;
+  line-height: 1.35;
   color: #1e1e1e;
   margin-top: 20px;
+  text-align: center;
+
+  white-space: normal;
+  word-break: break-word;
 `;
 
 const Author = styled.div`
@@ -102,6 +106,13 @@ const AuthorName = styled.p`
   font-weight: 500;
   text-transform: uppercase;
   margin-top: 5px;
+
+  /* 🔥 Prevent font flicker */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 `;
 
 const AuthorAvatar = styled(Image)`
@@ -181,16 +192,26 @@ export default function Testimonial() {
   /* ------------------------------------------------
      SPLIT AUTHOR NAME (LETTERS)
   ------------------------------------------------ */
-  const splitAuthorName = () => {
+  const splitAuthorNameOnce = () => {
     const el = nameRef.current;
     const letters = el.innerText.split("");
 
     el.innerHTML = letters
       .map(
         (c) =>
-          `<span class="char" style="display:inline-block; opacity:0">${c}</span>`
+          `<span class="char" style="display:inline-block">${c}</span>`
       )
       .join("");
+  };
+
+  const updateAuthorName = (newName: string) => {
+    const chars = nameRef.current.querySelectorAll(".char");
+
+    newName.split("").forEach((letter, i) => {
+      if (chars[i]) {
+        chars[i].textContent = letter;
+      }
+    });
   };
 
   /* ------------------------------------------------
@@ -220,17 +241,18 @@ export default function Testimonial() {
 
     gsap.fromTo(
       chars,
-      { y: 18, opacity: 0, scale: 0.92 },
+      { y: 18, scale: 0.92, filter: "blur(6px)" },
       {
         y: 0,
-        opacity: 1,
         scale: 1,
+        filter: "blur(0px)",
         stagger: 0.03,
         duration: 0.75,
         ease: "expo.out",
       }
     );
   };
+
 
   /* ------------------------------------------------
      SLIDE TRANSITION (SMOOTH & PREMIUM)
@@ -280,24 +302,31 @@ export default function Testimonial() {
      NEXT + PREV HANDLERS
   ------------------------------------------------ */
   const next = () => {
-    setIndex((i) => (i + 1) % reviews.length);
+    const newIndex = (index + 1) % reviews.length;
+    setIndex(newIndex);
+
     setTimeout(() => {
       splitText();
-      splitAuthorName();
+      updateAuthorName(reviews[newIndex].name);
       animateSlide(1);
     }, 20);
+
     resetAutoplay();
   };
 
   const prev = () => {
-    setIndex((i) => (i === 0 ? reviews.length - 1 : i - 1));
+    const newIndex = index === 0 ? reviews.length - 1 : index - 1;
+    setIndex(newIndex);
+
     setTimeout(() => {
       splitText();
-      splitAuthorName();
+      updateAuthorName(reviews[newIndex].name);
       animateSlide(-1);
     }, 20);
+
     resetAutoplay();
   };
+
 
   /* ------------------------------------------------
      AUTOPLAY
@@ -343,10 +372,11 @@ export default function Testimonial() {
   ------------------------------------------------ */
   useEffect(() => {
     splitText();
-    splitAuthorName();
+    splitAuthorNameOnce();   // ← only time we split
     animateText();
     animateAuthorName();
     startAutoplay();
+
     return () => stopAutoplay();
   }, []);
 

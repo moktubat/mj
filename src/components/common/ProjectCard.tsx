@@ -97,8 +97,8 @@ const ContentWrapper = styled.div`
 
 const Tags = styled.div`
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 24px;
   opacity: 0;
   transform: translateY(10px);
 
@@ -109,13 +109,14 @@ const Tags = styled.div`
 `;
 
 const Tag = styled.span`
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.50);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid #AFAFAF;
   border-style: dashed;
-  color: #fff;
+  color: #6A6A6A;
   font-family: ${FONT.oktaNeue};
-  font-size: 12px;
+  font-size: 16px;
+  line-height: 24px;
   font-weight: 500;
   padding: 6px 12px;
   border-radius: 100px;
@@ -127,9 +128,22 @@ const Tag = styled.span`
   }
 `;
 
+const TitleWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 8px;
+
+  @media (max-width: ${breakpoints.sm}) {
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+`;
+
 const CardTitle = styled.div`
   overflow: hidden;
-  margin-bottom: 8px;
+  flex: 1;
 
   h3 {
     font-family: ${FONT.alphaLyrae};
@@ -166,12 +180,27 @@ const CardTitle = styled.div`
   }
 `;
 
+const Category = styled.span`
+  font-family: ${FONT.oktaNeue};
+  font-size: 20px;
+  line-height: 28px;
+  color: #FF5948;
+  font-weight: 400;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+
+  @media (max-width: ${breakpoints.sm}) {
+    font-size: 12px;
+    line-height: 18px;
+  }
+`;
+
 const Description = styled.p`
   font-family: ${FONT.oktaNeue};
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 17px;
+  line-height: 25px;
   color: #6A6A6A;
-  margin: 0;
   opacity: 0;
   transform: translateY(10px);
   display: -webkit-box;
@@ -225,6 +254,7 @@ interface ProjectCardProps {
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     const cardRef = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLHeadingElement>(null);
+    const categoryRef = useRef<HTMLSpanElement>(null);
     const tagsRef = useRef<HTMLDivElement>(null);
     const descRef = useRef<HTMLParagraphElement>(null);
     const splitRef = useRef<SplitText | null>(null);
@@ -308,6 +338,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                 0.3
             );
 
+            // Animate category
+            timelineRef.current.to(
+                categoryRef.current,
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    ease: "power3.out",
+                },
+                0.3
+            );
+
             // Animate description
             timelineRef.current.to(
                 descRef.current,
@@ -344,7 +386,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
 
             // Reverse content animations
             timelineRef.current.to(
-                [tagsRef.current, titleRef.current, descRef.current],
+                [tagsRef.current, titleRef.current, categoryRef.current, descRef.current],
                 {
                     opacity: 0,
                     y: 10,
@@ -412,9 +454,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                     ))}
                 </Tags>
 
-                <CardTitle>
-                    <h3 ref={titleRef}>{project.title}</h3>
-                </CardTitle>
+                <TitleWrapper>
+                    <CardTitle>
+                        <h3 ref={titleRef}>{project.title}</h3>
+                    </CardTitle>
+                    <Category ref={categoryRef}>[{project.category}]</Category>
+                </TitleWrapper>
 
                 <Description ref={descRef}>{project.description}</Description>
             </ContentWrapper>
