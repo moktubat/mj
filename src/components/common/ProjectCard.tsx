@@ -99,8 +99,6 @@ const Tags = styled.div`
   display: flex;
   gap: 16px;
   margin-bottom: 24px;
-  opacity: 0;
-  transform: translateY(10px);
 
   @media (max-width: ${breakpoints.sm}) {
     gap: 6px;
@@ -121,6 +119,8 @@ const Tag = styled.span`
   padding: 6px 12px;
   border-radius: 100px;
   white-space: nowrap;
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
 
   @media (max-width: ${breakpoints.sm}) {
     font-size: 11px;
@@ -144,6 +144,8 @@ const TitleWrapper = styled.div`
 const CardTitle = styled.div`
   overflow: hidden;
   flex: 1;
+  position: relative; /* Add this */
+  height: 40px; /* Match line-height to prevent overflow */
 
   h3 {
     font-family: ${FONT.alphaLyrae};
@@ -155,17 +157,20 @@ const CardTitle = styled.div`
     transform-origin: left;
     margin: 0;
     color: #1E1E1E;
-    opacity: 0;
-    transform: translateY(10px);
   }
 
   .word {
     display: inline-block;
     will-change: transform;
     overflow: hidden;
+    transform: scaleX(0.96);
+    transform-origin: left;
+    vertical-align: top; /* Add this to prevent baseline issues */
   }
 
   @media (max-width: ${breakpoints.md}) {
+    height: 32px;
+    
     h3 {
       font-size: 28px;
       line-height: 32px;
@@ -173,12 +178,15 @@ const CardTitle = styled.div`
   }
 
   @media (max-width: ${breakpoints.sm}) {
+    height: 28px;
+    
     h3 {
       font-size: 24px;
       line-height: 28px;
     }
   }
 `;
+
 
 const Category = styled.span`
   font-family: ${FONT.oktaNeue};
@@ -187,8 +195,12 @@ const Category = styled.span`
   color: #FF5948;
   font-weight: 400;
   white-space: nowrap;
-  opacity: 0;
-  transform: translateY(10px);
+  overflow: hidden;
+
+  .char {
+    display: inline-block;
+    will-change: transform;
+  }
 
   @media (max-width: ${breakpoints.sm}) {
     font-size: 12px;
@@ -201,12 +213,15 @@ const Description = styled.p`
   font-size: 17px;
   line-height: 25px;
   color: #6A6A6A;
-  opacity: 0;
-  transform: translateY(10px);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+
+  .word {
+    display: inline-block;
+    will-change: transform, opacity;
+  }
 
   @media (max-width: ${breakpoints.sm}) {
     font-size: 13px;
@@ -257,21 +272,55 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     const categoryRef = useRef<HTMLSpanElement>(null);
     const tagsRef = useRef<HTMLDivElement>(null);
     const descRef = useRef<HTMLParagraphElement>(null);
-    const splitRef = useRef<SplitText | null>(null);
+
+    const titleSplitRef = useRef<SplitText | null>(null);
+    const categorySplitRef = useRef<SplitText | null>(null);
+    const descSplitRef = useRef<SplitText | null>(null);
     const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
     useLayoutEffect(() => {
-        if (!cardRef.current || !titleRef.current) return;
+        if (!cardRef.current || !titleRef.current || !categoryRef.current || !descRef.current) return;
 
         const cardPaths = cardRef.current.querySelectorAll(".svg-stroke path");
+        const tagElements = tagsRef.current?.querySelectorAll('.tag-item');
 
-        // Initialize SplitText
-        splitRef.current = new SplitText(titleRef.current, {
+        // Initialize SplitText for Title (WORDS ONLY - preserves scaleX)
+        titleSplitRef.current = new SplitText(titleRef.current, {
             type: "words",
             wordsClass: "word",
         });
 
-        gsap.set(splitRef.current.words, { yPercent: 100 });
+        // Initialize SplitText for Category (chars)
+        categorySplitRef.current = new SplitText(categoryRef.current, {
+            type: "chars",
+            charsClass: "char",
+        });
+
+        // Initialize SplitText for Description (words)
+        descSplitRef.current = new SplitText(descRef.current, {
+            type: "words",
+            wordsClass: "word",
+        });
+
+        // Set initial states - Title words (keep pixelated font)
+        gsap.set(titleSplitRef.current.words, {
+            yPercent: 100,
+        });
+
+        // Category chars
+        gsap.set(categorySplitRef.current.chars, {
+            yPercent: 120,
+            opacity: 0,
+            rotationZ: 15,
+            scale: 0.8,
+        });
+
+        // Description words
+        gsap.set(descSplitRef.current.words, {
+            yPercent: 100,
+            opacity: 0,
+            filter: 'blur(8px)',
+        });
 
         // Setup stroke dasharray and dashoffset
         cardPaths.forEach((path) => {
@@ -300,22 +349,26 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                 );
             });
 
-            // Animate tags
-            timelineRef.current.to(
-                tagsRef.current,
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.5,
-                    ease: "power3.out",
-                },
-                0.2
-            );
-
-            // Animate title words
-            if (splitRef.current) {
+            // Animate tags with premium bounce
+            if (tagElements) {
                 timelineRef.current.to(
-                    splitRef.current.words,
+                    tagElements,
+                    {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        duration: 0.6,
+                        ease: "back.out(2)",
+                        stagger: 0.08,
+                    },
+                    0.15
+                );
+            }
+
+            // Animate title words (ORIGINAL - preserves pixelated font)
+            if (titleSplitRef.current) {
+                timelineRef.current.to(
+                    titleSplitRef.current.words,
                     {
                         yPercent: 0,
                         duration: 0.75,
@@ -326,41 +379,38 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                 );
             }
 
-            // Animate title container
-            timelineRef.current.to(
-                titleRef.current,
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    ease: "power3.out",
-                },
-                0.3
-            );
+            // Animate category characters with bounce
+            if (categorySplitRef.current) {
+                timelineRef.current.to(
+                    categorySplitRef.current.chars,
+                    {
+                        yPercent: 0,
+                        opacity: 1,
+                        rotationZ: 0,
+                        scale: 1,
+                        duration: 0.7,
+                        ease: "back.out(1.7)",
+                        stagger: 0.03,
+                    },
+                    0.3
+                );
+            }
 
-            // Animate category
-            timelineRef.current.to(
-                categoryRef.current,
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    ease: "power3.out",
-                },
-                0.3
-            );
-
-            // Animate description
-            timelineRef.current.to(
-                descRef.current,
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    ease: "power3.out",
-                },
-                0.45
-            );
+            // Animate description words with blur
+            if (descSplitRef.current) {
+                timelineRef.current.to(
+                    descSplitRef.current.words,
+                    {
+                        yPercent: 0,
+                        opacity: 1,
+                        filter: 'blur(0px)',
+                        duration: 0.7,
+                        ease: "power3.out",
+                        stagger: 0.015,
+                    },
+                    0.4
+                );
+            }
         };
 
         // Mouse leave handler
@@ -368,47 +418,86 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             if (timelineRef.current) timelineRef.current.kill();
             timelineRef.current = gsap.timeline();
 
-            // Reverse SVG strokes
+
+            // Tags
+            if (tagElements) {
+                timelineRef.current.to(
+                    tagElements,
+                    {
+                        opacity: 0,
+                        y: 20,
+                        scale: 0.9,
+                        duration: 0.35,
+                        ease: "power2.inOut",
+                        stagger: { each: 0.04, from: "end" },
+                    },
+                    0
+                );
+            }
+
+            // Title words
+            if (titleSplitRef.current) {
+                timelineRef.current.to(
+                    titleSplitRef.current.words,
+                    {
+                        yPercent: 100,
+                        duration: 0.4,
+                        ease: "power2.inOut",
+                        stagger: { each: 0.04, from: "end" },
+                    },
+                    0
+                );
+            }
+
+            // Category
+            if (categorySplitRef.current) {
+                timelineRef.current.to(
+                    categorySplitRef.current.chars,
+                    {
+                        yPercent: 120,
+                        opacity: 0,
+                        rotationZ: 10,
+                        scale: 0.85,
+                        duration: 0.35,
+                        ease: "power2.inOut",
+                        stagger: { each: 0.015, from: "end" },
+                    },
+                    0.05
+                );
+            }
+
+            // Description
+            if (descSplitRef.current) {
+                timelineRef.current.to(
+                    descSplitRef.current.words,
+                    {
+                        yPercent: 100,
+                        opacity: 0,
+                        filter: "blur(6px)",
+                        duration: 0.35,
+                        ease: "power2.inOut",
+                        stagger: { each: 0.01, from: "end" },
+                    },
+                    0.1
+                );
+            }
+
+            // Paths
             cardPaths.forEach((path) => {
                 const svgPath = path as SVGPathElement;
                 const length = svgPath.getTotalLength();
+
                 timelineRef.current!.to(
                     path,
                     {
                         strokeDashoffset: length,
                         attr: { "stroke-width": 200 },
-                        duration: 1,
-                        ease: "power2.out",
+                        duration: 2.2,
+                        ease: "expo.out",
                     },
                     0
                 );
             });
-
-            // Reverse content animations
-            timelineRef.current.to(
-                [tagsRef.current, titleRef.current, categoryRef.current, descRef.current],
-                {
-                    opacity: 0,
-                    y: 10,
-                    duration: 0.4,
-                    ease: "power3.out",
-                },
-                0
-            );
-
-            // Reverse title words
-            if (splitRef.current) {
-                timelineRef.current.to(
-                    splitRef.current.words,
-                    {
-                        yPercent: 100,
-                        duration: 0.5,
-                        ease: "power3.out",
-                        stagger: { each: 0.05, from: "end" },
-                    },
-                    0
-                );
-            }
         };
 
         const card = cardRef.current;
@@ -418,7 +507,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
         return () => {
             card.removeEventListener("mouseenter", handleMouseEnter);
             card.removeEventListener("mouseleave", handleMouseLeave);
-            if (splitRef.current) splitRef.current.revert();
+            if (titleSplitRef.current) titleSplitRef.current.revert();
+            if (categorySplitRef.current) categorySplitRef.current.revert();
+            if (descSplitRef.current) descSplitRef.current.revert();
             if (timelineRef.current) timelineRef.current.kill();
         };
     }, []);
@@ -450,7 +541,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             <ContentWrapper>
                 <Tags ref={tagsRef}>
                     {project.tags.map((tag, index) => (
-                        <Tag key={index}>{tag}</Tag>
+                        <Tag key={index} className="tag-item">{tag}</Tag>
                     ))}
                 </Tags>
 

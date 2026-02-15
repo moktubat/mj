@@ -1,11 +1,21 @@
 "use client";
+import { breakpoints } from "@/styles/breakpoints";
 import { FONT } from "@/styles/font";
 import { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 
 const AboutSection = styled.section`
-  background: #D9D9D9;
-  padding: 80px 10px;
+  padding: 100px 10px;
+    background: #D9D9D9;
+    overflow: hidden;
+  
+    @media ${breakpoints.md} {
+      padding: 80px 10px;
+    }
+  
+    @media ${breakpoints.sm} {
+      padding: 60px 10px;
+    }
 `;
 
 const AboutContainer = styled.div`

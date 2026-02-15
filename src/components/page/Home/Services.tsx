@@ -92,8 +92,8 @@ const ServicesList = styled.div`
 /* ================= SERVICE CARD ================= */
 
 const ServiceCard = styled.div<{ $isActive: boolean }>`
-  background: ${({ $isActive }) => ($isActive ? "#000" : "#E7E7E7")};
-  border: 1px solid ${({ $isActive }) => ($isActive ? "#000" : "#e0e0e0")};
+  background: ${({ $isActive }) => ($isActive ? "#1e1e1e" : "#E7E7E7")};
+  border: 1px solid ${({ $isActive }) => ($isActive ? "#1e1e1e" : "#e0e0e0")};
   border-radius: 12px;
   padding: ${({ $isActive }) => ($isActive ? "40px" : "32px 40px")};
   cursor: pointer;

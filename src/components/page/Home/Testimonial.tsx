@@ -12,13 +12,13 @@ import clientLogo3 from "@/assets/clientLogo3.png";
 
 import Image from "next/image";
 import gsap from "gsap";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 
 /* ------------------------------------------------
    STYLES
 ------------------------------------------------ */
 const Section = styled.section`
-background: #D9D9D9;
+  background: #d9d9d9;
   padding: 80px 10px;
 `;
 
@@ -80,7 +80,6 @@ const Quote = styled.p`
   color: #1e1e1e;
   margin-top: 20px;
   text-align: center;
-
   white-space: normal;
   word-break: break-word;
 `;
@@ -106,8 +105,6 @@ const AuthorName = styled.p`
   font-weight: 500;
   text-transform: uppercase;
   margin-top: 5px;
-
-  /* 🔥 Prevent font flicker */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
@@ -117,6 +114,7 @@ const AuthorName = styled.p`
 
 const AuthorAvatar = styled(Image)`
   border-radius: 1000px;
+  border: 3px solid #ff5948;
   object-fit: cover;
   margin-right: -8px;
   z-index: 20;
@@ -163,14 +161,15 @@ const reviews = [
 ------------------------------------------------ */
 export default function Testimonial() {
   const [index, setIndex] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const wrapperRef = useRef(null);
-  const textRef = useRef(null);
-  const imgGroupRef = useRef(null);
-  const roleRef = useRef(null);
-  const nameRef = useRef(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const textRef = useRef<HTMLParagraphElement | null>(null);
+  const imgGroupRef = useRef<HTMLDivElement | null>(null);
+  const roleRef = useRef<HTMLParagraphElement | null>(null);
+  const nameRef = useRef<HTMLParagraphElement | null>(null);
 
-  const autoplayRef = useRef(null);
+  const autoplayRef = useRef<NodeJS.Timeout | null>(null);
   const dragStart = useRef(0);
   const dragging = useRef(false);
 
@@ -179,11 +178,13 @@ export default function Testimonial() {
   ------------------------------------------------ */
   const splitText = () => {
     const el = textRef.current;
+    if (!el) return;
+
     const words = el.innerText.split(" ");
 
     el.innerHTML = words
       .map(
-        (w) =>
+        (w: string) =>
           `<span class="word" style="display:inline-block; opacity:0">${w}&nbsp;</span>`
       )
       .join("");
@@ -194,17 +195,21 @@ export default function Testimonial() {
   ------------------------------------------------ */
   const splitAuthorNameOnce = () => {
     const el = nameRef.current;
+    if (!el) return;
+
     const letters = el.innerText.split("");
 
     el.innerHTML = letters
       .map(
-        (c) =>
+        (c: string) =>
           `<span class="char" style="display:inline-block">${c}</span>`
       )
       .join("");
   };
 
   const updateAuthorName = (newName: string) => {
+    if (!nameRef.current) return;
+
     const chars = nameRef.current.querySelectorAll(".char");
 
     newName.split("").forEach((letter, i) => {
@@ -218,6 +223,8 @@ export default function Testimonial() {
      TEXT ANIMATION
   ------------------------------------------------ */
   const animateText = (direction = 1) => {
+    if (!textRef.current) return;
+
     const words = textRef.current.querySelectorAll(".word");
 
     gsap.fromTo(
@@ -237,6 +244,8 @@ export default function Testimonial() {
      AUTHOR NAME ANIMATION
   ------------------------------------------------ */
   const animateAuthorName = () => {
+    if (!nameRef.current) return;
+
     const chars = nameRef.current.querySelectorAll(".char");
 
     gsap.fromTo(
@@ -252,7 +261,6 @@ export default function Testimonial() {
       }
     );
   };
-
 
   /* ------------------------------------------------
      SLIDE TRANSITION (SMOOTH & PREMIUM)
@@ -299,6 +307,27 @@ export default function Testimonial() {
   };
 
   /* ------------------------------------------------
+     AUTOPLAY
+  ------------------------------------------------ */
+  const stopAutoplay = useCallback(() => {
+    if (autoplayRef.current) {
+      clearInterval(autoplayRef.current);
+      autoplayRef.current = null;
+    }
+  }, []);
+
+  const startAutoplay = useCallback(() => {
+    stopAutoplay();
+    autoplayRef.current = setInterval(() => {
+      setIndex((prev) => (prev + 1) % reviews.length);
+    }, 8000);
+  }, [stopAutoplay]);
+
+  const resetAutoplay = useCallback(() => {
+    startAutoplay();
+  }, [startAutoplay]);
+
+  /* ------------------------------------------------
      NEXT + PREV HANDLERS
   ------------------------------------------------ */
   const next = () => {
@@ -327,37 +356,26 @@ export default function Testimonial() {
     resetAutoplay();
   };
 
-
-  /* ------------------------------------------------
-     AUTOPLAY
-  ------------------------------------------------ */
-  const startAutoplay = () => {
-    stopAutoplay();
-    autoplayRef.current = setInterval(() => next(), 8000);
-  };
-
-  const stopAutoplay = () => {
-    if (autoplayRef.current) clearInterval(autoplayRef.current);
-  };
-
-  const resetAutoplay = () => startAutoplay();
-
   /* ------------------------------------------------
      DRAG / SWIPE
   ------------------------------------------------ */
-  const onDragStart = (e) => {
+  const onDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!wrapperRef.current) return;
+
     wrapperRef.current.style.cursor = "grabbing";
     dragging.current = true;
     stopAutoplay();
 
-    dragStart.current = e.touches ? e.touches[0].clientX : e.clientX;
+    dragStart.current = 'touches' in e ? e.touches[0].clientX : e.clientX;
   };
 
-  const onDragEnd = (e) => {
+  const onDragEnd = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!wrapperRef.current) return;
+
     wrapperRef.current.style.cursor = "grab";
     if (!dragging.current) return;
 
-    const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+    const endX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX;
     const diff = endX - dragStart.current;
 
     if (diff > 60) prev();
@@ -368,17 +386,39 @@ export default function Testimonial() {
   };
 
   /* ------------------------------------------------
-     ON MOUNT
+     ON MOUNT - Initialize animations
   ------------------------------------------------ */
   useEffect(() => {
-    splitText();
-    splitAuthorNameOnce();   // ← only time we split
-    animateText();
-    animateAuthorName();
+    // Initial setup with delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      splitText();
+      splitAuthorNameOnce();
+      animateText();
+      animateAuthorName();
+      setIsInitialized(true);
+    }, 100);
+
     startAutoplay();
 
-    return () => stopAutoplay();
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      stopAutoplay();
+    };
+  }, [startAutoplay, stopAutoplay]);
+
+  /* ------------------------------------------------
+     ON INDEX CHANGE - Animate transitions
+  ------------------------------------------------ */
+  useEffect(() => {
+    // Skip animation on initial mount
+    if (!isInitialized) return;
+
+    setTimeout(() => {
+      splitText();
+      updateAuthorName(reviews[index].name);
+      animateSlide(1);
+    }, 20);
+  }, [index, isInitialized]);
 
   const current = reviews[index];
 

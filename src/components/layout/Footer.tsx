@@ -13,10 +13,42 @@ import MahadyIcon from "@/assets/mahady.svg";
 import { FONT } from "@/styles/font";
 import gsap from "gsap";
 
+
+const VideoBackground = styled.video`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.3; /* Lower opacity for footer */
+  z-index: 0;
+`;
+
 const FooterSection = styled.footer`
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
   background-color: #1e1e1e;
   padding: 80px 10px 32px;
   color: #fff;
+  overflow: hidden; /* Add this */
+  
+  /* Premium fade/blur effect when content overlaps */
+  transition: opacity 0.4s ease, filter 0.4s ease;
+  
+  /* Optional: slight blur when covered */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to bottom, transparent, rgba(30, 30, 30, 0.3));
+    pointer-events: none;
+    z-index: 1; /* Add this */
+  }
 `;
 
 const FooterContainer = styled.div`
@@ -25,6 +57,8 @@ const FooterContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 48px;
+  position: relative; /* Add this */
+  z-index: 2; /* Add this */
 `;
 
 const TopSection = styled.div`
@@ -294,6 +328,9 @@ const Footer = () => {
 
   return (
     <FooterSection>
+      <VideoBackground autoPlay loop muted playsInline>
+        <source src="/bgVideo.mp4" type="video/mp4" />
+      </VideoBackground>
       <FooterContainer>
         {/* Top Section */}
         <TopSection>

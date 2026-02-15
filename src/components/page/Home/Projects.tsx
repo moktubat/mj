@@ -10,6 +10,7 @@ import { breakpoints } from "@/styles/breakpoints";
 import ProjectCard from "@/components/common/ProjectCard";
 import projectsData from "@/components/common/projects.data";
 import { Project } from "@/types/project";
+import Link from "next/link";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -93,6 +94,76 @@ const Grid = styled.div`
   }
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+
+  @media (max-width: ${breakpoints.sm}) {
+    margin-top: 32px;
+  }
+`;
+
+
+
+
+const ButtonText = styled.p`
+  color: #fff;
+  text-align: center;
+  font-family: ${FONT.oktaNeue};
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 24px;
+  padding: 16px 20px;
+  border-radius: 100px;
+  background: #ff5948;
+`;
+
+const ButtonIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 4px 100px 100px 100px;
+  background: #ff5948;
+  width: 56px;
+  height: 56px;
+
+  transition: 
+    transform 0.5s cubic-bezier(0.65, 0, 0.35, 1),
+    border-radius 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+
+  svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+`;
+
+const ButtonWrapper = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover ${ButtonIcon} {
+    border-radius: 100px 4px 100px 100px;
+  }
+
+  &:hover ${ButtonIcon} svg {
+    transform: rotate(90deg);
+  }
+`;
+
+
+const ArrowIconSVG = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M17 17L7 7M7 7V17M7 7H17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+
+);
+
 /* ================= COMPONENT ================= */
 const Projects: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -150,6 +221,17 @@ const Projects: React.FC = () => {
             <ProjectCard key={project.id} project={project} />
           ))}
         </Grid>
+
+
+
+        <ButtonContainer>
+          <ButtonWrapper href="/projects">
+            <ButtonText>Explore Projects</ButtonText>
+            <ButtonIcon>
+              <ArrowIconSVG />
+            </ButtonIcon>
+          </ButtonWrapper>
+        </ButtonContainer>
       </Container>
     </Section>
   );

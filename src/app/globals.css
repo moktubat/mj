@@ -82,3 +82,14 @@ html.lenis body {
 .text-oktaNeue {
   font-family: var(--font-primary);
 }
+
+
+::selection {
+  background-color: #ff5948;
+  color: white;
+}
+
+::-moz-selection {
+  background-color: #ff5948;
+  color: white;
+}
