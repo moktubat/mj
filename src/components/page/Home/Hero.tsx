@@ -47,6 +47,10 @@ const HeroContainer = styled.div`
   margin: 0 auto;
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
 `;
 
 const Title = styled.h1`
@@ -190,8 +194,8 @@ const SvgWrapper = styled.div.withConfig({
   shouldForwardProp: (prop) => !["bodyLength", "headLength"].includes(prop),
 }) <{ bodyLength: number; headLength: number }>`
   position: absolute;
-  bottom: 105px;
-  right: 105px;
+  bottom: clamp(80px, 25vh, 230px);
+right: clamp(50px, 9vw, 110px);
 
   .arrow-body {
     stroke: #FDF5FD;

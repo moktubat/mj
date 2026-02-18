@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer";
 import HydrationWrapper from "@/components/HydratedWrapper";
 import StyledComponentsRegistry from "./registry";
 import CustomCursor from "@/components/CustomCursor";
+import Navbar from "@/components/layout/Navbar";
 
 export default function RootLayout({
   children,
@@ -17,6 +18,7 @@ export default function RootLayout({
           <LenisProvider>
             <HydrationWrapper>
               <CustomCursor />
+              <Navbar />
               {children}
               <Footer />
             </HydrationWrapper>
