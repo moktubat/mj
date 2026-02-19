@@ -293,7 +293,7 @@ const Process = () => {
 
         <GraphWrap ref={graphRef}>
           <Bubble
-            ref={(el) => (bubblesRef.current[0] = el)}
+            ref={(el) => { bubblesRef.current[0] = el; }}
             $w={620}
             $h={620}
             $bg="#0D0D0D"
@@ -309,7 +309,7 @@ const Process = () => {
           </Bubble>
 
           <Bubble
-            ref={(el) => (bubblesRef.current[1] = el)}
+            ref={(el) => { bubblesRef.current[1] = el; }}
             $w={358}
             $h={358}
             $bg="#FF5948"
@@ -325,7 +325,7 @@ const Process = () => {
           </Bubble>
 
           <Bubble
-            ref={(el) => (bubblesRef.current[2] = el)}
+            ref={(el) => { bubblesRef.current[2] = el; }}
             $w={252}
             $h={252}
             $bg="rgba(255, 255, 255, 0.1)"
@@ -342,7 +342,7 @@ const Process = () => {
           </Bubble>
 
           <Bubble
-            ref={(el) => (bubblesRef.current[3] = el)}
+            ref={(el) => { bubblesRef.current[3] = el; }}
             $w={260}
             $h={260}
             $bg="rgba(23, 23, 23, 0.5)"
@@ -359,7 +359,7 @@ const Process = () => {
           </Bubble>
 
           <Bubble
-            ref={(el) => (bubblesRef.current[4] = el)}
+            ref={(el) => { bubblesRef.current[4] = el; }}
             $w={288}
             $h={288}
             $bg="#FF5948"
@@ -375,7 +375,7 @@ const Process = () => {
           </Bubble>
 
           <Bubble
-            ref={(el) => (bubblesRef.current[5] = el)}
+            ref={(el) => { bubblesRef.current[5] = el; }}
             $w={240}
             $h={240}
             $bg="rgba(255,255,255,0.1)"

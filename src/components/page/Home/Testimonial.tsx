@@ -265,7 +265,7 @@ export default function Testimonial() {
   /* ------------------------------------------------
      SLIDE TRANSITION (SMOOTH & PREMIUM)
   ------------------------------------------------ */
-  const animateSlide = (direction = 1) => {
+  const animateSlide = useCallback((direction = 1) => {
     const timeline = gsap.timeline({
       defaults: { duration: 0.55, ease: "power4.out" },
     });
@@ -304,7 +304,7 @@ export default function Testimonial() {
 
     animateText(direction);
     animateAuthorName();
-  };
+  }, []);
 
   /* ------------------------------------------------
      AUTOPLAY
@@ -410,7 +410,6 @@ export default function Testimonial() {
      ON INDEX CHANGE - Animate transitions
   ------------------------------------------------ */
   useEffect(() => {
-    // Skip animation on initial mount
     if (!isInitialized) return;
 
     setTimeout(() => {
@@ -418,7 +417,7 @@ export default function Testimonial() {
       updateAuthorName(reviews[index].name);
       animateSlide(1);
     }, 20);
-  }, [index, isInitialized]);
+  }, [index, isInitialized, animateSlide]);
 
   const current = reviews[index];
 
