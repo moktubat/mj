@@ -92,7 +92,7 @@ const MainHeading = styled.h2`
 
 const DeveloperLine = styled.span`
   display: flex;
-  align-items: center;
+  align-items: end;
   gap: 12px;
 `;
 

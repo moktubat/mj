@@ -2,78 +2,99 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, cubicBezier, motion } from 'framer-motion';
 import Magnetic from '@/components/common/Magnetic';
 import styled from 'styled-components';
 import { breakpoints } from '@/styles/breakpoints';
+import MJlogo from '@/assets/MJ-Logo.svg';
+import { FONT } from '@/styles/font';
+import Link from 'next/link';
 
 /* ─── Animations ─── */
 const menuSlide = {
-    initial: { x: 'calc(100% + 100px)' },
-    enter: { x: '0', transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] } },
-    exit: { x: 'calc(100% + 100px)', transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] } },
+  initial: { x: 'calc(100% + 100px)' },
+  enter: { x: '0', transition: { duration: 0.8, ease: cubicBezier(0.76, 0, 0.24, 1) } },
+  exit: { x: 'calc(100% + 100px)', transition: { duration: 0.8, ease: cubicBezier(0.76, 0, 0.24, 1) } },
 };
 
 const slide = {
-    initial: { x: 80 },
-    enter: (i: number) => ({ x: 0, transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1], delay: 0.05 * i } }),
-    exit: (i: number) => ({ x: 80, transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1], delay: 0.05 * i } }),
+  initial: { x: 80 },
+  enter: (i: number) => ({ x: 0, transition: { duration: 0.8, ease: cubicBezier(0.76, 0, 0.24, 1), delay: 0.05 * i }, }),
+  exit: (i: number) => ({ x: 80, transition: { duration: 0.8, ease: cubicBezier(0.76, 0, 0.24, 1), delay: 0.05 * i }, }),
 };
 
 const scale = {
-    open: { scale: 1, transition: { duration: 0.3 } },
-    closed: { scale: 0, transition: { duration: 0.4 } },
+  open: { scale: 1, transition: { duration: 0.3 } },
+  closed: { scale: 0, transition: { duration: 0.4 } },
 };
 
 /* ─── Data ─── */
 const navItems = [
-    { title: 'Home', href: '#home' },
-    { title: 'Work', href: '#work' },
-    { title: 'About', href: '#about' },
-    { title: 'Contact', href: '#contact' },
+  { title: 'Home', href: '/' },
+  { title: 'About', href: '/#about' },
+  { title: 'Projects', href: '/projects' },
+  { title: 'Services', href: '/#services' },
+  { title: 'Experience', href: '/#experience' },
+  { title: 'Contact', href: '/#contact' },
 ];
 
 const socialLinks = [
-    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/rishi-lahoti-665889166/' },
-    { label: 'GitHub', href: 'https://github.com/rishilahoti' },
-    { label: 'Twitter', href: 'https://twitter.com/rishii_lahoti' },
-    { label: 'Resume', href: 'https://drive.google.com/file/d/1hypQJfvYegfps9uh1_Nc0GXYD2zjzOIX/view?usp=sharing' },
+  { label: 'LinkedIn', href: '#' },
+  { label: 'GitHub', href: '#' },
+  { label: 'Twitter', href: '#' },
+  { label: 'Resume', href: '#' },
 ];
 
-/* ─── Menu Button (fixed, always visible) ─── */
-const MenuButtonContainer = styled.div`
+/* ─── Header ─── */
+const HeaderBar = styled.header`
   position: fixed;
-  right: 0;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 200;
-`;
-
-const MenuBtn = styled.div`
-  position: relative;
-  margin: 20px;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background-color: #1c1d20;
-  cursor: pointer;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: background-color 0.3s ease;
+  padding: 20px 40px;
 
-  &:hover {
-    background-color: #2a2b2f;
+  @media screen and (max-width: ${breakpoints.md}) {
+    padding: 16px 24px;
   }
 `;
 
+const Logo = styled(Link)`
+  display: flex;
+  align-items: center;
+
+  svg {
+    width: 61px;
+    height: 68px;
+  }
+
+  @media screen and (max-width: ${breakpoints.md}) {
+    svg {
+      width: 44px;
+      height: 49px;
+    }
+  }
+`;
+
+const MenuBtn = styled.div`
+  cursor: pointer;
+  padding: 6px 0;
+`;
+
 const MenuLabel = styled.span`
-  font-family: Lexend, sans-serif;
-  font-size: 11px;
+  font-family: ${FONT.oktaNeue};
+  font-size: 32px;
   font-weight: 400;
-  color: white;
-  letter-spacing: 0.12em;
+  letter-spacing: -0.64px;
+  color: #e7e7e7;
   text-transform: uppercase;
+
+  @media screen and (max-width: ${breakpoints.md}) {
+    font-size: 20px;
+  }
 `;
 
 /* ─── Slide-out Menu Panel ─── */
@@ -93,10 +114,10 @@ const Menu = styled(motion.div)`
   }
 `;
 
-const Body = styled.div`
+const NavWrapper = styled.div`
   box-sizing: border-box;
   height: 100%;
-  padding: 100px;
+  padding: 80px 110px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -109,28 +130,29 @@ const Body = styled.div`
 const NavList = styled.div`
   display: flex;
   flex-direction: column;
-  font-size: 56px;
-  gap: 12px;
-  margin-top: 80px;
+  color: #d9d9d9;
+  gap: 8px;
+  margin-top: 40px;
 
   @media screen and (max-width: ${breakpoints.md}) {
     font-size: 36px;
   }
 `;
 
-const NavHeader = styled.div`
-  color: rgb(153, 153, 153);
+const SectionHeader = styled.div`
+  color: #d9d9d9;
   border-bottom: 1px solid rgb(153, 153, 153);
+  font-family: ${FONT.oktaNeue};
+  font-size: 14px;
   text-transform: uppercase;
-  font-size: 11px;
-  margin-bottom: 40px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
 
   @media screen and (max-width: ${breakpoints.md}) {
-    font-size: 8px;
+    font-size: 11px;
   }
 `;
 
-/* ─── Nav Link ─── */
 const LinkWrapper = styled(motion.div)`
   position: relative;
   display: flex;
@@ -138,62 +160,37 @@ const LinkWrapper = styled(motion.div)`
 `;
 
 const Indicator = styled(motion.div)`
-  width: 10px;
-  height: 10px;
+  width: 15px;
+  height: 15px;
   background-color: white;
   border-radius: 50%;
   position: absolute;
-  left: -30px;
+  left: -25px;
 `;
 
-const Anchor = styled.a`
+
+const NavLink = styled(Link)`
   text-decoration: none;
-  color: white;
-  font-weight: 300;
+  color: #d9d9d9;
+  font-family: ${FONT.alphaLyrae};
+  font-size: 48px;
+  line-height: 60px;
+  font-weight: 500;
+  text-transform: uppercase;
   cursor: pointer;
 
-  &:hover { opacity: 0.7; }
-`;
-
-/* ─── Footer ─── */
-const Footer = styled.div`
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  font-size: 12px;
-  gap: 40px;
+  &:hover {
+    color: #ff5948;
+    text-decoration: none;
+  }
 
   @media screen and (max-width: ${breakpoints.md}) {
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
+    font-size: 32px;
+    line-height: 44px;
   }
 `;
 
-const FooterItem = styled.div`
-  position: relative;
 
-  &:hover span { transform: scaleX(1); }
-`;
-
-const Underline = styled.span`
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background-color: white;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1);
-`;
-
-const FooterLink = styled.a`
-  font-family: Lexend, sans-serif;
-  font-size: 13px;
-  color: white;
-  text-decoration: none;
-`;
 
 /* ─── SVG Curve ─── */
 const SvgCurve = styled.svg`
@@ -210,92 +207,75 @@ const SvgCurve = styled.svg`
    Main Component
 ════════════════════════════════════════ */
 export default function Navbar() {
-    const [isActive, setIsActive] = useState(false);
-    const pathname = usePathname();
+  const [isActive, setIsActive] = useState(false);
+  const pathname = usePathname();
+  const [selectedIndicator, setSelectedIndicator] = useState(pathname);
 
-    // Close on route change
-    useEffect(() => {
-        if (isActive) setIsActive(false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pathname]);
+  useEffect(() => {
+    if (isActive) setIsActive(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
-    // Curve path
-    const height = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const initialPath = `M100 0 L100 ${height} Q-100 ${height / 2} 100 0`;
-    const targetPath = `M100 0 L100 ${height} Q100 ${height / 2} 100 0`;
-    const curve = {
-        initial: { d: initialPath },
-        enter: { d: targetPath, transition: { duration: 1, ease: [0.76, 0, 0.24, 1] as [number, number, number, number] } },
-        exit: { d: initialPath, transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as [number, number, number, number] } },
-    };
+  const height = typeof window !== 'undefined' ? window.innerHeight : 800;
+  const initialPath = `M100 0 L100 ${height} Q-100 ${height / 2} 100 0`;
+  const targetPath = `M100 0 L100 ${height} Q100 ${height / 2} 100 0`;
+  const curve = {
+    initial: { d: initialPath },
+    enter: { d: targetPath, transition: { duration: 1, ease: [0.76, 0, 0.24, 1] as [number, number, number, number] } },
+    exit: { d: initialPath, transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as [number, number, number, number] } },
+  };
 
-    const [selectedIndicator, setSelectedIndicator] = useState(pathname);
 
-    const handleNavClick = (href: string) => {
-        const targetId = href.replace('#', '');
-        const el = document.getElementById(targetId);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-        setSelectedIndicator(href);
-        setIsActive(false);
-    };
 
-    return (
-        <>
-            {/* Always-visible MENU button */}
-            <MenuButtonContainer>
-                <MenuBtn onClick={() => setIsActive((prev) => !prev)}>
-                    <MenuLabel>{isActive ? 'Close' : 'Menu'}</MenuLabel>
-                </MenuBtn>
-            </MenuButtonContainer>
+  return (
+    <>
+      <HeaderBar>
+        <Logo href="/">
+          <MJlogo width={61} height={68} />
+        </Logo>
+        <Magnetic>
+          <MenuBtn onClick={() => setIsActive((prev) => !prev)}>
+            <MenuLabel>{isActive ? 'Close' : 'Menu'}</MenuLabel>
+          </MenuBtn>
+        </Magnetic>
+      </HeaderBar>
 
-            {/* Slide-out panel */}
-            <AnimatePresence mode="wait">
-                {isActive && (
-                    <Menu variants={menuSlide} initial="initial" animate="enter" exit="exit">
-                        <Body>
-                            {/* Nav links */}
-                            <NavList onMouseLeave={() => setSelectedIndicator(pathname)}>
-                                <NavHeader><p>Navigation</p></NavHeader>
-                                {navItems.map((item, index) => (
-                                    <LinkWrapper
-                                        key={item.href}
-                                        onMouseEnter={() => setSelectedIndicator(item.href)}
-                                        custom={index}
-                                        variants={slide}
-                                        initial="initial"
-                                        animate="enter"
-                                        exit="exit"
-                                    >
-                                        <Indicator variants={scale} animate={selectedIndicator === item.href ? 'open' : 'closed'} />
-                                        <Anchor href={item.href} onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}>
-                                            {item.title}
-                                        </Anchor>
-                                    </LinkWrapper>
-                                ))}
-                            </NavList>
+      <AnimatePresence mode="wait">
+        {isActive && (
+          <Menu variants={menuSlide} initial="initial" animate="enter" exit="exit">
+            <NavWrapper>
 
-                            {/* Social / footer links */}
-                            <Footer>
-                                {socialLinks.map(({ label, href }) => (
-                                    <Magnetic key={label}>
-                                        <FooterItem>
-                                            <FooterLink href={href} target="_blank" rel="noopener noreferrer">
-                                                {label}
-                                            </FooterLink>
-                                            <Underline />
-                                        </FooterItem>
-                                    </Magnetic>
-                                ))}
-                            </Footer>
-                        </Body>
+              {/* Nav links */}
+              <NavList onMouseLeave={() => setSelectedIndicator(pathname)}>
+                <SectionHeader>Navigation</SectionHeader>
+                {navItems.map((item, index) => (
+                  <LinkWrapper
+                    key={item.href}
+                    onMouseEnter={() => setSelectedIndicator(item.href)}
+                    custom={index}
+                    variants={slide}
+                    initial="initial"
+                    animate="enter"
+                    exit="exit"
+                  >
+                    <Indicator variants={scale} animate={selectedIndicator === item.href ? 'open' : 'closed'} />
+                    <NavLink href={item.href} onClick={() => setIsActive(false)}>
+                      {item.title}
+                    </NavLink>
+                  </LinkWrapper>
+                ))}
+              </NavList>
 
-                        {/* Decorative curve */}
-                        <SvgCurve>
-                            <motion.path variants={curve} initial="initial" animate="enter" exit="exit" />
-                        </SvgCurve>
-                    </Menu>
-                )}
-            </AnimatePresence>
-        </>
-    );
+              {/* Social Links */}
+              
+            </NavWrapper>
+
+            <SvgCurve>
+              <motion.path variants={curve} initial="initial" animate="enter" exit="exit" />
+            </SvgCurve>
+          </Menu>
+        )}
+      </AnimatePresence>
+    </>
+  );
 }
